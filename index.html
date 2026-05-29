@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PhysicsLab · Scientific Computing Repository</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <!-- SCANLINE OVERLAY -->
+  <div class="scanlines" aria-hidden="true"></div>
+
+  <!-- ═══════════════ NAVIGATION ═══════════════ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="#home" class="nav-logo">
+        <span class="logo-bracket">[</span>
+        <span class="logo-text">ΦLab</span>
+        <span class="logo-bracket">]</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#home" class="nav-link">~/home</a></li>
+        <li><a href="#categories" class="nav-link">~/library</a></li>
+        <li><a href="#projects" class="nav-link">~/projects</a></li>
+        <li><a href="#contributors" class="nav-link">~/team</a></li>
+        <li><a href="#docs" class="nav-link">~/docs</a></li>
+      </ul>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══════════════ HERO ═══════════════ -->
+  <section id="home" class="hero">
+    <div class="hero-bg-grid" aria-hidden="true"></div>
+    <div class="hero-content">
+      <div class="hero-label">
+        <span class="label-dot"></span>
+        <span>Collaborative Scientific Computing Repository</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="title-line">Physics</span>
+        <span class="title-line accent">Compute</span>
+        <span class="title-line">Lab</span>
+      </h1>
+      <p class="hero-sub">
+        A curated archive of numerical methods, computational physics codes,<br />
+        and scientific tools — built by two physics students, for everyone.
+      </p>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-num" data-target="24">0</span>
+          <span class="stat-label">Projects</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="9">0</span>
+          <span class="stat-label">Categories</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="2">0</span>
+          <span class="stat-label">Contributors</span>
+        </div>
+        <div class="stat-div"></div>
+        <div class="stat">
+          <span class="stat-num" data-target="4">0</span>
+          <span class="stat-label">Languages</span>
+        </div>
+      </div>
+      <div class="hero-cta">
+        <a href="#projects" class="btn btn-primary">Browse Library</a>
+        <a href="https://github.com" target="_blank" class="btn btn-ghost">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          GitHub
+        </a>
+      </div>
+    </div>
+    <div class="hero-terminal" aria-hidden="true">
+      <div class="terminal-header">
+        <span class="t-btn t-red"></span>
+        <span class="t-btn t-yellow"></span>
+        <span class="t-btn t-green"></span>
+        <span class="t-title">physicslab ~ bash</span>
+      </div>
+      <div class="terminal-body" id="terminalBody"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ SEARCH & FILTER ═══════════════ -->
+  <section id="search-section" class="search-section">
+    <div class="container">
+      <div class="search-bar-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Search projects, methods, languages…" autocomplete="off" />
+        <kbd>⌘K</kbd>
+      </div>
+      <div class="filter-row">
+        <div class="filter-group">
+          <label class="filter-label">Language</label>
+          <div class="filter-chips" id="langFilter">
+            <button class="chip active" data-filter="lang" data-value="all">All</button>
+            <button class="chip" data-filter="lang" data-value="Python">Python</button>
+            <button class="chip" data-filter="lang" data-value="Julia">Julia</button>
+            <button class="chip" data-filter="lang" data-value="C++">C++</button>
+            <button class="chip" data-filter="lang" data-value="MATLAB">MATLAB</button>
+          </div>
+        </div>
+        <div class="filter-group">
+          <label class="filter-label">Topic</label>
+          <div class="filter-chips" id="topicFilter">
+            <button class="chip active" data-filter="topic" data-value="all">All</button>
+            <button class="chip" data-filter="topic" data-value="Numerical Integration">Integration</button>
+            <button class="chip" data-filter="topic" data-value="Differential Equations">ODEs/PDEs</button>
+            <button class="chip" data-filter="topic" data-value="Linear Algebra">Lin. Algebra</button>
+            <button class="chip" data-filter="topic" data-value="Root Finding">Root Finding</button>
+            <button class="chip" data-filter="topic" data-value="Astrophysics">Astrophysics</button>
+            <button class="chip" data-filter="topic" data-value="Spectroscopy">Spectroscopy</button>
+            <button class="chip" data-filter="topic" data-value="Fourier Methods">Fourier</button>
+            <button class="chip" data-filter="topic" data-value="Data Analysis">Data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CATEGORIES ═══════════════ -->
+  <section id="categories" class="categories-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">01 / Library</span>
+        <h2 class="section-title">Repository Categories</h2>
+        <p class="section-desc">Browse by computational domain. Each category contains implementations, notes, and worked examples.</p>
+      </div>
+      <div class="categories-grid">
+        <!-- Cards populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ PROJECTS ═══════════════ -->
+  <section id="projects" class="projects-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">02 / Projects</span>
+        <h2 class="section-title">Code Archive</h2>
+        <p class="section-desc">Individual implementations with descriptions, methods, and source links.</p>
+      </div>
+      <div class="results-meta">
+        <span id="resultsCount">Showing all projects</span>
+      </div>
+      <div class="projects-grid" id="projectsGrid">
+        <!-- Cards populated by JS -->
+      </div>
+      <div class="no-results hidden" id="noResults">
+        <span class="no-results-icon">∅</span>
+        <p>No projects match your query. Try adjusting filters.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ CONTRIBUTORS ═══════════════ -->
+  <section id="contributors" class="contributors-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">03 / Team</span>
+        <h2 class="section-title">Contributors</h2>
+        <p class="section-desc">The humans behind this repository.</p>
+      </div>
+      <div class="contributors-grid">
+
+        <div class="contributor-card">
+          <div class="contrib-avatar">
+            <div class="avatar-ring"></div>
+            <div class="avatar-inner">AK</div>
+          </div>
+          <div class="contrib-info">
+            <h3 class="contrib-name">Arjun Kapoor</h3>
+            <span class="contrib-role">Computational Physics · Numerical Methods</span>
+            <p class="contrib-bio">
+              MSc Physics student with focus on N-body simulations, fluid dynamics, and high-performance computing. Maintainer of the Astrophysics and ODE modules.
+            </p>
+            <div class="contrib-tags">
+              <span class="tag">Python</span>
+              <span class="tag">C++</span>
+              <span class="tag">HPC</span>
+              <span class="tag">Astrophysics</span>
+            </div>
+            <a href="https://github.com" target="_blank" class="contrib-link">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              github.com/arjunkapoor
+            </a>
+          </div>
+        </div>
+
+        <div class="contributor-card">
+          <div class="contrib-avatar">
+            <div class="avatar-ring"></div>
+            <div class="avatar-inner">PS</div>
+          </div>
+          <div class="contrib-info">
+            <h3 class="contrib-name">Priya Sharma</h3>
+            <span class="contrib-role">Data Science · Spectroscopy · Signal Processing</span>
+            <p class="contrib-bio">
+              MSc Physics student specialising in observational astrophysics, Fourier analysis, and spectral data processing. Maintainer of Spectroscopy and Data Analysis modules.
+            </p>
+            <div class="contrib-tags">
+              <span class="tag">Python</span>
+              <span class="tag">Julia</span>
+              <span class="tag">MATLAB</span>
+              <span class="tag">Signal Processing</span>
+            </div>
+            <a href="https://github.com" target="_blank" class="contrib-link">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+              github.com/priyasharma
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ DOCUMENTATION ═══════════════ -->
+  <section id="docs" class="docs-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">04 / Documentation</span>
+        <h2 class="section-title">Getting Started</h2>
+        <p class="section-desc">Everything you need to run, contribute, and extend this repository.</p>
+      </div>
+      <div class="docs-grid">
+
+        <div class="doc-block">
+          <div class="doc-icon">▶</div>
+          <h3>How to Run Codes</h3>
+          <div class="doc-content">
+            <p>Clone the repository and install dependencies:</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span>bash</span>
+                <button class="copy-btn" data-code="git clone https://github.com/physicslab/repo.git&#10;cd repo&#10;pip install -r requirements.txt">copy</button>
+              </div>
+              <pre><code>git clone https://github.com/physicslab/repo.git
+cd repo
+pip install -r requirements.txt</code></pre>
+            </div>
+            <p>Navigate to a category folder and run any script:</p>
+            <div class="code-block">
+              <div class="code-header">
+                <span>bash</span>
+                <button class="copy-btn" data-code="cd numerical_integration&#10;python simpson_rule.py">copy</button>
+              </div>
+              <pre><code>cd numerical_integration
+python simpson_rule.py</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-block">
+          <div class="doc-icon">⬡</div>
+          <h3>Dependencies</h3>
+          <div class="doc-content">
+            <div class="dep-list">
+              <div class="dep-item">
+                <span class="dep-name">numpy</span>
+                <span class="dep-ver">≥ 1.24</span>
+                <span class="dep-desc">Array operations, linear algebra</span>
+              </div>
+              <div class="dep-item">
+                <span class="dep-name">scipy</span>
+                <span class="dep-ver">≥ 1.11</span>
+                <span class="dep-desc">Scientific algorithms, integration</span>
+              </div>
+              <div class="dep-item">
+                <span class="dep-name">matplotlib</span>
+                <span class="dep-ver">≥ 3.7</span>
+                <span class="dep-desc">Plotting and visualization</span>
+              </div>
+              <div class="dep-item">
+                <span class="dep-name">astropy</span>
+                <span class="dep-ver">≥ 5.3</span>
+                <span class="dep-desc">Astronomy / astrophysics tools</span>
+              </div>
+              <div class="dep-item">
+                <span class="dep-name">Julia</span>
+                <span class="dep-ver">≥ 1.9</span>
+                <span class="dep-desc">High-performance numerical codes</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-block">
+          <div class="doc-icon">⊞</div>
+          <h3>Folder Structure</h3>
+          <div class="doc-content">
+            <div class="code-block">
+              <div class="code-header"><span>tree</span></div>
+              <pre><code>physicslab/
+├── numerical_integration/
+│   ├── simpson_rule.py
+│   └── gaussian_quadrature.py
+├── differential_equations/
+│   ├── runge_kutta4.py
+│   └── finite_difference.jl
+├── linear_algebra/
+│   └── lu_decomposition.py
+├── root_finding/
+│   └── newton_raphson.py
+├── fourier_methods/
+│   └── fft_analysis.py
+├── astrophysics/
+│   ├── nbody_sim.cpp
+│   └── orbital_mechanics.py
+├── spectroscopy/
+│   └── spectral_analysis.py
+├── data_analysis/
+│   └── curve_fitting.py
+├── requirements.txt
+└── README.md</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="doc-block">
+          <div class="doc-icon">⊕</div>
+          <h3>Contribution Guide</h3>
+          <div class="doc-content">
+            <ol class="contrib-steps">
+              <li>
+                <span class="step-num">01</span>
+                <div>
+                  <strong>Fork</strong> the repository on GitHub and clone your fork locally.
+                </div>
+              </li>
+              <li>
+                <span class="step-num">02</span>
+                <div>
+                  Create a <strong>new branch</strong> named after your feature: <code>git checkout -b feature/my-method</code>
+                </div>
+              </li>
+              <li>
+                <span class="step-num">03</span>
+                <div>
+                  Place your code in the <strong>appropriate category folder</strong>. Include a docstring with method description and references.
+                </div>
+              </li>
+              <li>
+                <span class="step-num">04</span>
+                <div>
+                  Add a brief <strong>README.md</strong> inside your folder explaining the algorithm and expected output.
+                </div>
+              </li>
+              <li>
+                <span class="step-num">05</span>
+                <div>
+                  Open a <strong>Pull Request</strong> with a clear title and description. One of us will review within 48 hours.
+                </div>
+              </li>
+            </ol>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════ FOOTER ═══════════════ -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <span class="logo-bracket">[</span>
+          <span class="logo-text">ΦLab</span>
+          <span class="logo-bracket">]</span>
+          <p>Physics Compute Lab — open source scientific computing archive.</p>
+        </div>
+        <div class="footer-links">
+          <a href="#home">Home</a>
+          <a href="#categories">Library</a>
+          <a href="#projects">Projects</a>
+          <a href="#contributors">Team</a>
+          <a href="#docs">Docs</a>
+          <a href="https://github.com" target="_blank">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 Arjun Kapoor & Priya Sharma · MIT License</span>
+        <span>Built with curiosity and coffee.</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
