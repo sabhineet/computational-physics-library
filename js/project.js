@@ -221,8 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
           .replace(/^---$/gm,           '<hr>')
           .replace(/^[-*]\s+(.+)$/gm,   '<li>$1</li>')
           .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
-          .replace(/
-/g, '<br>');
+          .replace(/\n/g, '<br>');
         return `<div class="nb-cell nb-cell--md" data-cell="${i}">${html}</div>`;
       }
 
@@ -235,8 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `<div class="nb-output nb-output--stream"><pre>${esc(text)}</pre></div>`;
           }
           if (out.output_type === 'error') {
-            const tb = (out.traceback || []).join('
-')
+            const tb = (out.traceback || []).join('\n')
               .replace(/\[[0-9;]*m/g, ''); // strip ANSI codes
             return `<div class="nb-output nb-output--error"><pre>${esc(tb)}</pre></div>`;
           }
@@ -272,8 +270,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `<div class="nb-cell nb-cell--raw"><pre>${esc(source)}</pre></div>`;
       }
       return '';
-    }).join('
-');
+    }).join('\n');
   }
 
   /* ════════════════════════
