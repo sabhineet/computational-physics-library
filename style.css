@@ -399,6 +399,11 @@ input { font-family: inherit; }
   font-size: 0.8rem;
   font-family: var(--font-mono);
 }
+/* Critical: CSS display:flex overrides the HTML `hidden` attribute.
+   This restores the correct behaviour so hideLoader() actually hides it. */
+.page-loader[hidden] {
+  display: none !important;
+}
 .loader-ring {
   width: 28px; height: 28px;
   border: 2px solid var(--border);
