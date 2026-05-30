@@ -8,77 +8,79 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
-  /* ── Navbar first (always safe) ── */
+  /* ── Navbar & search — safe to run immediately ── */
   MCL.initNavbar();
   MCL.Search.init();
 
-  /* ── Categories grid ── */
-  const catGrid = document.getElementById('categoriesGrid');
-  if (catGrid) {
-    catGrid.innerHTML = MCL.categories.map(cat =>
-      `<div class="reveal">${MCL.renderCategoryCard(cat)}</div>`
-    ).join('');
-  }
-
-  /* ── Projects grid (first 6 from flat list) ── */
-  const projGrid = document.getElementById('projectsGrid');
-  if (projGrid) {
-    projGrid.innerHTML = MCL.allProjects.slice(0, 6).map(p =>
-      `<div class="reveal">${MCL.renderProjectCard(p)}</div>`
-    ).join('');
-  }
-
-  /* ── Contributors ── */
-  const contribGrid = document.getElementById('contributorsGrid');
-  if (contribGrid && MCL.contributors && MCL.contributors.length) {
-    contribGrid.innerHTML = MCL.contributors.map(c =>
-      `<div class="reveal">${MCL.renderContributorCard(c)}</div>`
-    ).join('');
-  }
-
-  /* ── Terminal — fire immediately, no observer needed ── */
+  /* ── Terminal — starts its own setTimeout chain, fire immediately ── */
   MCL.buildTerminal('terminalBody');
 
   /* ─────────────────────────────────────────────────────
-     STATS COUNTER FIX
-     Problem: hero is above the fold on load, so the
-     IntersectionObserver with threshold:0.5 may never
-     trigger its callback if the element is already
-     partially visible when the observer attaches.
-     Fix: check isIntersecting immediately AND watch.
+     Wait for GitHub sync (MCL.ready) before rendering
+     grids and stats counters, so auto-discovered projects
+     are included and totalProjects is the final value.
+     Falls back to static data instantly if API is offline.
   ───────────────────────────────────────────────────── */
-  const statsEl = document.querySelector('.hero-stats');
-  if (statsEl) {
-    let counted = false;
+  MCL.ready.then(() => {
 
-    const runCounters = () => {
-      if (counted) return;
-      counted = true;
-      MCL.animateCounters();
-    };
-
-    const obs = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        runCounters();
-        obs.disconnect();
-      }
-    }, { threshold: 0.1 });   // lower threshold — 10% visible is enough
-
-    obs.observe(statsEl);
-
-    // Fallback: if element is already in viewport right now, fire directly
-    const rect = statsEl.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      // Small delay so the page has painted
-      setTimeout(runCounters, 300);
+    /* ── Categories grid ── */
+    const catGrid = document.getElementById('categoriesGrid');
+    if (catGrid) {
+      catGrid.innerHTML = MCL.categories.map(cat =>
+        `<div class="reveal">${MCL.renderCategoryCard(cat)}</div>`
+      ).join('');
     }
-  }
 
-  /* ── Scroll reveal ── */
-  MCL.initScrollReveal('.reveal');
+    /* ── Projects grid (first 6 from flat list) ── */
+    const projGrid = document.getElementById('projectsGrid');
+    if (projGrid) {
+      projGrid.innerHTML = MCL.allProjects.slice(0, 6).map(p =>
+        `<div class="reveal">${MCL.renderProjectCard(p)}</div>`
+      ).join('');
+    }
 
-  /* ── Copy buttons ── */
-  MCL.initCopyButtons();
+    /* ── Contributors ── */
+    const contribGrid = document.getElementById('contributorsGrid');
+    if (contribGrid && MCL.contributors && MCL.contributors.length) {
+      contribGrid.innerHTML = MCL.contributors.map(c =>
+        `<div class="reveal">${MCL.renderContributorCard(c)}</div>`
+      ).join('');
+    }
+
+    /* ─────────────────────────────────────────────────────
+       STATS COUNTER
+       Hero is above the fold so IntersectionObserver may
+       never fire if already visible. Double-trigger: watch
+       AND check immediately after sync resolves.
+    ───────────────────────────────────────────────────── */
+    const statsEl = document.querySelector('.hero-stats');
+    if (statsEl) {
+      let counted = false;
+
+      const runCounters = () => {
+        if (counted) return;
+        counted = true;
+        MCL.animateCounters();
+      };
+
+      const obs = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) { runCounters(); obs.disconnect(); }
+      }, { threshold: 0.1 });
+
+      obs.observe(statsEl);
+
+      // Already in viewport? Fire after a short paint delay
+      const rect = statsEl.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        setTimeout(runCounters, 150);
+      }
+    }
+
+    /* ── Scroll reveal & copy buttons ── */
+    MCL.initScrollReveal('.reveal');
+    MCL.initCopyButtons();
+
+  }); // end MCL.ready.then
 
   /* ── Active nav link (scroll spy) ── */
   const sections  = ['home', 'categories', 'projects', 'contributors', 'docs'];

@@ -50,7 +50,7 @@ MCL.contributors = [
   institution:     'University of Sussex',
   degree:          'PhD Physics',
   github:          'ruru-99',        // ← replace with her actual GitHub username
-  github_url:      'https://github.com/ruruthakur',
+  github_url:      'https://github.com/ruru-99',
   specializations: ['Computational Physics'],  // ← update with her actual focus areas
   bio:             'PhD researcher at the University of Sussex.',  // ← update as needed
   },
