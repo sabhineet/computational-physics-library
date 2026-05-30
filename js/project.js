@@ -185,24 +185,206 @@ document.addEventListener('DOMContentLoaded', () => {
      from GitHub raw via MCL.rawUrl(). For a static demo
      we render a representative sample.
   ════════════════════════ */
+  /* ════════════════════════
+     NOTEBOOK RENDERER
+     Converts .ipynb JSON (nbformat 4) cells → HTML.
+  ════════════════════════ */
+  function renderNotebook (rawText) {
+    let nb;
+    try { nb = JSON.parse(rawText); }
+    catch (e) {
+      console.error('[MCL] .ipynb parse error:', e);
+      return `<div class="nb-parse-error">Could not parse notebook JSON: ${e.message}</div>`;
+    }
+
+    const cells = nb.cells || [];
+    const esc   = s => String(s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const src   = cell => Array.isArray(cell.source) ? cell.source.join('') : (cell.source || '');
+
+    return cells.map((cell, i) => {
+      const source = src(cell);
+      if (!source.trim()) return '';
+
+      if (cell.cell_type === 'markdown') {
+        /* Minimal markdown → HTML: headings, bold, italic, code, hr, lists */
+        let html = esc(source)
+          .replace(/^######\s+(.+)$/gm, '<h6>$1</h6>')
+          .replace(/^#####\s+(.+)$/gm,  '<h5>$1</h5>')
+          .replace(/^####\s+(.+)$/gm,   '<h4>$1</h4>')
+          .replace(/^###\s+(.+)$/gm,    '<h3>$1</h3>')
+          .replace(/^##\s+(.+)$/gm,     '<h2>$1</h2>')
+          .replace(/^#\s+(.+)$/gm,      '<h1>$1</h1>')
+          .replace(/\*\*(.+?)\*\*/g,    '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g,        '<em>$1</em>')
+          .replace(/`([^`]+)`/g,        '<code>$1</code>')
+          .replace(/^---$/gm,           '<hr>')
+          .replace(/^[-*]\s+(.+)$/gm,   '<li>$1</li>')
+          .replace(/(<li>[\s\S]*?<\/li>)/g, '<ul>$1</ul>')
+          .replace(/
+/g, '<br>');
+        return `<div class="nb-cell nb-cell--md" data-cell="${i}">${html}</div>`;
+      }
+
+      if (cell.cell_type === 'code') {
+        const highlighted = MCL.highlightPython(source);
+        /* Render outputs: text, error, display_data */
+        const outputs = (cell.outputs || []).map(out => {
+          if (out.output_type === 'stream') {
+            const text = Array.isArray(out.text) ? out.text.join('') : (out.text || '');
+            return `<div class="nb-output nb-output--stream"><pre>${esc(text)}</pre></div>`;
+          }
+          if (out.output_type === 'error') {
+            const tb = (out.traceback || []).join('
+')
+              .replace(/\[[0-9;]*m/g, ''); // strip ANSI codes
+            return `<div class="nb-output nb-output--error"><pre>${esc(tb)}</pre></div>`;
+          }
+          if (out.output_type === 'display_data' || out.output_type === 'execute_result') {
+            const data = out.data || {};
+            if (data['image/png']) {
+              return `<div class="nb-output nb-output--image"><img src="data:image/png;base64,${data['image/png']}" alt="notebook output" style="max-width:100%;border-radius:4px;margin-top:8px"></div>`;
+            }
+            if (data['text/html']) {
+              const html = Array.isArray(data['text/html']) ? data['text/html'].join('') : data['text/html'];
+              return `<div class="nb-output nb-output--html">${html}</div>`;
+            }
+            if (data['text/plain']) {
+              const text = Array.isArray(data['text/plain']) ? data['text/plain'].join('') : data['text/plain'];
+              return `<div class="nb-output nb-output--plain"><pre>${esc(text)}</pre></div>`;
+            }
+          }
+          return '';
+        }).join('');
+
+        const execCount = cell.execution_count != null ? `[${cell.execution_count}]` : '[ ]';
+        return `
+          <div class="nb-cell nb-cell--code" data-cell="${i}">
+            <div class="nb-cell-in">
+              <span class="nb-exec-count">In ${execCount}</span>
+              <pre>${highlighted}</pre>
+            </div>
+            ${outputs ? `<div class="nb-cell-out">${outputs}</div>` : ''}
+          </div>`;
+      }
+
+      if (cell.cell_type === 'raw') {
+        return `<div class="nb-cell nb-cell--raw"><pre>${esc(source)}</pre></div>`;
+      }
+      return '';
+    }).join('
+');
+  }
+
+  /* ════════════════════════
+     CONTENT AREA — type-aware
+  ════════════════════════ */
   function renderContent (cat, proj) {
     const area = document.getElementById('projectContent');
     if (!area) return;
 
-    /* -- Try to fetch actual source from GitHub raw -- */
     const rawUrl = MCL.rawUrl(cat, proj);
+    const type   = (proj.type || proj.file.split('.').pop()).toLowerCase();
 
-    /* Fetch wrapper — falls back to demo code on error */
-    fetchOrDemo(rawUrl, proj).then(source => {
+    /* Loading indicator */
+    area.innerHTML = `<div style="padding:40px;text-align:center;color:var(--tx-03);
+      font-family:var(--font-mono);font-size:.8rem">fetching ${proj.file}…</div>`;
 
+    fetchSource(rawUrl, proj, type).then(({ content: source, fromDemo }) => {
       const allProjs = MCL.allProjects;
       const idx  = allProjs.findIndex(p => p.id === proj.id);
       const prev = allProjs[idx - 1];
       const next = allProjs[idx + 1];
 
+      const navBlock = `
+        <nav class="proj-related" aria-label="Adjacent projects">
+          ${prev ? `<a href="project.html?cat=${prev.categoryId}&id=${prev.id}" class="proj-related-link">
+            <span class="proj-related-dir">← Previous</span>
+            <span class="proj-related-name">${prev.title}</span>
+          </a>` : '<span></span>'}
+          ${next ? `<a href="project.html?cat=${next.categoryId}&id=${next.id}" class="proj-related-link proj-related-link--next">
+            <span class="proj-related-dir">Next →</span>
+            <span class="proj-related-name">${next.title}</span>
+          </a>` : '<span></span>'}
+        </nav>`;
+
+      const tagsBlock = proj.tags?.length ? `
+        <div style="margin-top:var(--sp-xl);display:flex;gap:6px;flex-wrap:wrap">
+          ${proj.tags.map(t => `<span style="font-family:var(--font-mono);font-size:.62rem;
+            color:var(--tx-02);background:var(--bg-02);
+            border:1px solid var(--bd-00);border-radius:var(--r-xs);padding:3px 9px">${t}</span>`).join('')}
+        </div>` : '';
+
+      /* ── .ipynb — render notebook cells ── */
+      if (type === 'ipynb') {
+        const nbHtml = fromDemo
+          ? `<div style="padding:24px;color:var(--tx-02);font-family:var(--font-serif)">
+               Notebook not yet in repository — static data displayed.
+             </div>`
+          : renderNotebook(source);
+
+        area.innerHTML = `
+          <div class="proj-content-area">
+            <div class="code-viewer reveal" aria-label="Notebook: ${proj.file}">
+              <div class="code-viewer-header">
+                <span class="code-viewer-filename">${proj.file}</span>
+                <div class="code-viewer-actions">
+                  <a href="${rawUrl}" target="_blank" rel="noopener" class="btn btn--ghost">
+                    ${MCL.githubIcon} raw
+                  </a>
+                </div>
+              </div>
+              <div class="code-viewer-body nb-viewer">${nbHtml}</div>
+            </div>
+            <div class="output-block reveal"><div class="output-block-header">Expected Output</div>
+              <div class="output-block-body">${proj.output}</div></div>
+            ${tagsBlock}
+            ${navBlock}
+          </div>`;
+
+        MCL.initScrollReveal('.reveal');
+        return;
+      }
+
+      /* ── .html — render in sandboxed iframe ── */
+      if (type === 'html') {
+        const blob = new Blob([source], { type: 'text/html' });
+        const burl = URL.createObjectURL(blob);
+        area.innerHTML = `
+          <div class="proj-content-area">
+            <div class="code-viewer reveal" aria-label="Page: ${proj.file}">
+              <div class="code-viewer-header">
+                <span class="code-viewer-filename">${proj.file}</span>
+                <div class="code-viewer-actions">
+                  <button class="copy-btn btn btn--ghost" id="copyCodeBtn">copy source</button>
+                  <a href="${rawUrl}" target="_blank" rel="noopener" class="btn btn--ghost">
+                    ${MCL.githubIcon} raw
+                  </a>
+                </div>
+              </div>
+              <div class="code-viewer-body" style="padding:0">
+                <iframe src="${burl}" title="${proj.file}" sandbox="allow-scripts allow-same-origin"
+                  style="width:100%;min-height:500px;border:none;background:#fff"
+                  onload="URL.revokeObjectURL('${burl}')"></iframe>
+              </div>
+            </div>
+            ${tagsBlock}
+            ${navBlock}
+          </div>`;
+
+        document.getElementById('copyCodeBtn')?.addEventListener('click', function () {
+          navigator.clipboard.writeText(source).then(() => {
+            this.textContent = 'copied!';
+            setTimeout(() => { this.textContent = 'copy source'; }, 2000);
+          });
+        });
+        MCL.initScrollReveal('.reveal');
+        return;
+      }
+
+      /* ── .py / .md / default — syntax-highlighted code ── */
       area.innerHTML = `
         <div class="proj-content-area">
-
           <div class="code-viewer reveal" aria-label="Source: ${proj.file}">
             <div class="code-viewer-header">
               <span class="code-viewer-filename">${proj.file}</span>
@@ -214,41 +396,17 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </div>
             <div class="code-viewer-body">
-              <pre aria-label="Python source code">${MCL.highlightPython(source)}</pre>
+              <pre aria-label="Source code">${MCL.highlightPython(source)}</pre>
             </div>
           </div>
-
           <div class="output-block reveal" aria-label="Expected output">
             <div class="output-block-header">Expected Output</div>
             <div class="output-block-body">${proj.output}</div>
           </div>
+          ${tagsBlock}
+          ${navBlock}
+        </div>`;
 
-          <div style="margin-top:var(--sp-xl);display:flex;gap:6px;flex-wrap:wrap">
-            ${proj.tags.map(t => `
-              <span style="font-family:var(--font-mono);font-size:.62rem;
-                           color:var(--tx-02);background:var(--bg-02);
-                           border:1px solid var(--bd-00);border-radius:var(--r-xs);
-                           padding:3px 9px">${t}</span>
-            `).join('')}
-          </div>
-
-          <nav class="proj-related" aria-label="Adjacent projects">
-            ${prev ? `
-              <a href="project.html?cat=${prev.categoryId}&id=${prev.id}" class="proj-related-link">
-                <span class="proj-related-dir">← Previous</span>
-                <span class="proj-related-name">${prev.title}</span>
-              </a>` : '<span></span>'}
-            ${next ? `
-              <a href="project.html?cat=${next.categoryId}&id=${next.id}"
-                 class="proj-related-link proj-related-link--next">
-                <span class="proj-related-dir">Next →</span>
-                <span class="proj-related-name">${next.title}</span>
-              </a>` : '<span></span>'}
-          </nav>
-        </div>
-      `;
-
-      /* Wire copy-code button */
       document.getElementById('copyCodeBtn')?.addEventListener('click', function () {
         navigator.clipboard.writeText(source).then(() => {
           this.textContent = 'copied!';
@@ -262,18 +420,29 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   /* ════════════════════════
-     FETCH HELPER
-     Attempts GitHub raw fetch; falls back to demo code.
+     FETCH HELPER — type-aware
+     Returns { content, fromDemo }
   ════════════════════════ */
-  async function fetchOrDemo (url, proj) {
+  async function fetchSource (url, proj, type) {
     try {
+      console.log(`[MCL] Fetching source: ${url}`);
       const res = await fetch(url);
       if (res.ok) {
         const text = await res.text();
-        if (text && text.trim().length > 10) return text;
+        if (text && text.trim().length > 10) {
+          console.log(`[MCL] ✓ Fetched ${url} (${text.length} bytes)`);
+          return { content: text, fromDemo: false };
+        }
+        console.warn(`[MCL] Fetched ${url} but content is empty/too short.`);
+      } else {
+        console.warn(`[MCL] HTTP ${res.status} fetching ${url}`);
       }
-    } catch (_) { /* network error — use demo */ }
-    return buildDemoCode(proj);
+    } catch (err) {
+      console.warn(`[MCL] Network error fetching ${url}:`, err.message);
+    }
+    /* Fall back to demo code only for .py files; ipynb/html show a notice */
+    const demo = (type === 'py' || type === 'md') ? buildDemoCode(proj) : '';
+    return { content: demo, fromDemo: true };
   }
 
   /* ════════════════════════

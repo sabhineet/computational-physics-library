@@ -15,8 +15,8 @@ MCL.meta = {
   name:       'MYCODELAB',
   tagline:    'Computational Physics Code Archive',
   /* ★ UPDATE THIS to your real GitHub repo URL ★ */
-  github:     'https://github.com/sabhineet/computational-physics-library',
-  repoRaw:    'https://raw.githubusercontent.com/sabhineet/computational-physics-library/main',
+  github:     'https://github.com/ruru-99/computational-physics-library',
+  repoRaw:    'https://raw.githubusercontent.com/ruru-99/computational-physics-library/main',
 };
 
 /* ── CONTRIBUTORS ──────────────────────────────────────── */
@@ -27,8 +27,8 @@ MCL.contributors = [
     initials:        'AS',
     institution:     'UPES Dehradun',
     degree:          'MSc Physics',
-    github:          'sabhineet',
-    github_url:      'https://github.com/sabhineet',
+    github:          'ruru-99',
+    github_url:      'https://github.com/ruru-99',
     specializations: ['Numerical Methods', 'Root Finding', 'Linear Algebra', 'ODEs'],
     bio:             'MSc Physics candidate with research interests in computational methods, numerical analysis, and scientific computing. Focuses on robust algorithm implementation and mathematical rigour.',
   },
@@ -42,17 +42,6 @@ MCL.contributors = [
     github_url:      'https://github.com/agniksr',
     specializations: ['Fourier Methods', 'Data Analysis', 'Numerical Simulations', 'Differentiation'],
     bio:             'MSc Physics candidate specialising in signal processing, spectral analysis, and numerical simulation. Contributor to Fourier methods, data analysis, and differentiation modules.',
-  },
-  {
-  id:              'ruru',
-  name:            'Ruru Thakur',
-  initials:        'RT',
-  institution:     'University of Sussex',
-  degree:          'PhD Physics',
-  github:          'ruru-99',        // ← replace with her actual GitHub username
-  github_url:      'https://github.com/ruru-99',
-  specializations: ['Computational Physics'],  // ← update with her actual focus areas
-  bio:             'PhD researcher at the University of Sussex.',  // ← update as needed
   },
 ];
 
@@ -263,22 +252,33 @@ MCL.folderUrl = (cat, proj) =>
    Silently degrades if the API is rate-limited or offline.
 ══════════════════════════════════════════════════════════ */
 
-const _API  = `https://api.github.com/repos/sabhineet/computational-physics-library/contents`;
+const _API  = `https://api.github.com/repos/ruru-99/computational-physics-library/contents`;
 const _ghCache = {};
 
 async function _ghFetch(path) {
   if (_ghCache[path]) return _ghCache[path];
+  /* BUG FIX: avoid double-slash when path already has a leading slash */
+  const url = path ? `${_API}/${path.replace(/^\//, '')}` : _API;
   try {
-    const res = await fetch(`${_API}/${path}`, {
+    const res = await fetch(url, {
       headers: { Accept: 'application/vnd.github+json' },
     });
     if (!res.ok) {
-      console.warn(`[MCL] GitHub API HTTP ${res.status} for "${path}" — using static data only.`);
+      const remaining = res.headers.get('x-ratelimit-remaining');
+      const reset     = res.headers.get('x-ratelimit-reset');
+      if (res.status === 403 && remaining === '0') {
+        const resetTime = reset ? new Date(Number(reset) * 1000).toLocaleTimeString() : 'unknown';
+        console.warn(`[MCL] GitHub API rate-limited. Resets at ${resetTime}. Using static data.`);
+      } else {
+        console.warn(`[MCL] GitHub API HTTP ${res.status} for "${url}" — using static data only.`);
+      }
       return null;
     }
-    return (_ghCache[path] = await res.json());
+    const data = await res.json();
+    _ghCache[path] = data;
+    return data;
   } catch (err) {
-    console.warn(`[MCL] GitHub API unreachable (${path}):`, err.message);
+    console.warn(`[MCL] GitHub API unreachable (${url}):`, err.message);
     return null;
   }
 }
@@ -302,13 +302,14 @@ function _filenameToId(name) {
 
 function _autoProject(filename) {
   const ext = filename.split('.').pop().toLowerCase();
+  const langMap = { py: 'Python', ipynb: 'Python (Notebook)', html: 'HTML', md: 'Markdown' };
   return {
     id:          _filenameToId(filename),
     title:       _filenameToTitle(filename),
     description: `${_filenameToTitle(filename)} — numerical implementation.`,
     file:        filename,
     type:        ext,
-    language:    'Python',
+    language:    langMap[ext] || 'Python',
     author:      'abhineet',
     method:      _filenameToTitle(filename),
     output:      '— run the script to see output —',
@@ -317,12 +318,17 @@ function _autoProject(filename) {
   };
 }
 
-const _SUPPORTED = new Set(['py', 'ipynb', 'md']);
-const _SKIP      = new Set(['readme.md', 'index.html', 'license', 'license.md', '.gitignore']);
+const _SUPPORTED = new Set(['py', 'ipynb', 'html', 'md']);
+const _SKIP      = new Set(['readme.md', 'license', 'license.md', '.gitignore']);
 
 async function _syncWithGitHub() {
+  console.log(`[MCL] Starting GitHub auto-sync → ${_API}/${_CODES}`);
   const rootItems = await _ghFetch(_CODES);
-  if (!rootItems || !Array.isArray(rootItems)) return;
+  if (!rootItems || !Array.isArray(rootItems)) {
+    console.warn('[MCL] Auto-sync: could not read "codes/" folder. Check repo name & branch.');
+    return;
+  }
+  console.log(`[MCL] Auto-sync: ${rootItems.filter(i => i.type === 'dir').length} folder(s) found in codes/`);
 
   for (const folder of rootItems.filter(i => i.type === 'dir')) {
     /* Find matching category by folder name (case-insensitive) */

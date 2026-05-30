@@ -3,7 +3,7 @@
     "name": "MYCODELAB",
     "tagline": "Computational Physics Code Archive",
     "description": "A curated repository of numerical methods, computational physics implementations, and scientific tools — built by MSc Physics students for the broader research community.",
-    "github": "https://github.com/sabhineet/computational-physics-library",
+    "github": "https://github.com/ruru-99/computational-physics-library",
     "version": "1.0.0",
     "updated": "2025-07"
   },
@@ -14,8 +14,8 @@
       "initials": "AS",
       "institution": "UPES Dehradun",
       "degree": "MSc Physics",
-      "github": "sabhineet",
-      "github_url": "https://github.com/sabhineet",
+      "github": "ruru-99",
+      "github_url": "https://github.com/ruru-99",
       "specializations": ["Numerical Methods", "Root Finding", "Linear Algebra", "ODEs"],
       "bio": "MSc Physics candidate with research interests in computational methods, numerical analysis, and scientific computing. Focuses on robust algorithm implementation and mathematical rigour."
     },
