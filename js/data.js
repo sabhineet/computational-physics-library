@@ -43,6 +43,17 @@ MCL.contributors = [
     specializations: ['Fourier Methods', 'Data Analysis', 'Numerical Simulations', 'Differentiation'],
     bio:             'MSc Physics candidate specialising in signal processing, spectral analysis, and numerical simulation. Contributor to Fourier methods, data analysis, and differentiation modules.',
   },
+  {
+  id:              'ruru',
+  name:            'Ruru Thakur',
+  initials:        'RT',
+  institution:     'University of Sussex',
+  degree:          'PhD Physics',
+  github:          'ruruthakur',        // ← replace with her actual GitHub username
+  github_url:      'https://github.com/ruruthakur',
+  specializations: ['Computational Physics'],  // ← update with her actual focus areas
+  bio:             'PhD researcher at the University of Sussex.',  // ← update as needed
+  },
 ];
 
 /* ── CATEGORIES & PROJECTS ─────────────────────────────── */
