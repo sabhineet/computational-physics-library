@@ -245,7 +245,10 @@ function toggleSidebarMobile() {
 /* ══════════════════════════════════════════════════════════
    PAGE RENDERER HELPERS
 ══════════════════════════════════════════════════════════ */
-function showLoader() { DOM.pageLoader.hidden = false; }
+function showLoader() {
+  DOM.pageRoot.innerHTML = '';   // clear stale page so spinner is the only thing visible
+  DOM.pageLoader.hidden = false;
+}
 function hideLoader() { DOM.pageLoader.hidden = true; }
 
 function setPage(html) {

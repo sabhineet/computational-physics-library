@@ -383,6 +383,10 @@ input { font-family: inherit; }
 }
 .has-sidebar .main-content { margin-left: var(--sidebar-w); }
 
+/* Desktop: sidebar is always visible when has-sidebar is active —
+   no .open toggle needed above the mobile breakpoint. */
+.has-sidebar .sidebar { transform: translateX(0); }
+
 /* Loading state */
 .page-loader {
   display: flex;
@@ -1642,8 +1646,9 @@ input { font-family: inherit; }
    RESPONSIVE
 ══════════════════════════════════════════════════════════ */
 @media (max-width: 1060px) {
+  /* On tablet/mobile the sidebar slides in via .open only — no permanent display */
   .has-sidebar .main-content { margin-left: 0; }
-  .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
+  .has-sidebar .sidebar { transform: translateX(calc(-1 * var(--sidebar-w))); }
   .sidebar.open { transform: translateX(0); }
 }
 
