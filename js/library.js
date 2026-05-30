@@ -175,9 +175,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 250);
   }
 
-  /* ── BOOT ── */
-  buildSidebar();
-  renderLibrary();
-  scrollToHash();
-  MCL.initCopyButtons();
+  /* ── BOOT ──
+     Wait for MCL.ready (GitHub auto-sync) before rendering,
+     so auto-discovered projects are included on first paint. */
+  MCL.ready.then(() => {
+    buildSidebar();
+    renderLibrary();
+    scrollToHash();
+    MCL.initCopyButtons();
+  });
 });

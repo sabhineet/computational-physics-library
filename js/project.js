@@ -15,20 +15,24 @@ document.addEventListener('DOMContentLoaded', () => {
   const catId  = params.get('cat');
   const projId = params.get('id');
 
-  const cat  = MCL.getCategory(catId);
-  const proj = cat?.projects.find(p => p.id === projId);
+  /* Wait for GitHub sync before rendering so auto-discovered
+     projects are available when we look up ?cat= & ?id=     */
+  MCL.ready.then(() => {
+    const cat  = MCL.getCategory(catId);
+    const proj = cat?.projects.find(p => p.id === projId);
 
-  if (!cat || !proj) { renderNotFound(); return; }
+    if (!cat || !proj) { renderNotFound(); return; }
 
-  document.title = `${proj.title} — MYCODELAB`;
+    document.title = `${proj.title} — MYCODELAB`;
 
-  buildSidebar(catId, projId);
-  renderHeader(cat, proj);
-  renderMeta(cat, proj);
-  renderContent(cat, proj);
+    buildSidebar(catId, projId);
+    renderHeader(cat, proj);
+    renderMeta(cat, proj);
+    renderContent(cat, proj);
 
-  MCL.initScrollReveal('.reveal');
-  MCL.initCopyButtons();
+    MCL.initScrollReveal('.reveal');
+    MCL.initCopyButtons();
+  });
 
   /* ════════════════════════
      SIDEBAR

@@ -229,13 +229,155 @@ MCL.langClass = lang => ({
   'MATLAB': 'lang-badge--matlab',
 }[lang] || 'lang-badge--default');
 
-/* GitHub raw URL builder */
-MCL.rawUrl = (cat, proj) =>
-  `${MCL.meta.repoRaw}/mycodelab/codes/${cat.folder}/${proj.folder}/${proj.file}`;
+/* ── GitHub root path for code files ─────────────────────
+   The repo stores files at:  codes/{CategoryFolder}/{File.py}
+   NOT at mycodelab/codes/…/{subfolder}/{File.py}
+   ──────────────────────────────────────────────────────── */
+const _CODES = 'codes';
 
-/* GitHub folder URL builder */
+/* GitHub raw URL builder — fixed path */
+MCL.rawUrl = (cat, proj) =>
+  `${MCL.meta.repoRaw}/${_CODES}/${cat.folder}/${proj.file}`;
+
+/* GitHub folder URL builder — fixed path */
 MCL.folderUrl = (cat, proj) =>
-  `${MCL.meta.github}/tree/main/mycodelab/codes/${cat.folder}/${proj.folder}`;
+  `${MCL.meta.github}/tree/main/${_CODES}/${cat.folder}`;
+
+/* ══════════════════════════════════════════════════════════
+   GITHUB AUTO-SYNC
+   Calls the GitHub Contents API once at startup to discover
+   any .py / .ipynb files that exist in the repo but are not
+   yet listed in MCL.categories. New files are added
+   automatically; new folders become new categories.
+   Silently degrades if the API is rate-limited or offline.
+══════════════════════════════════════════════════════════ */
+
+const _API  = `https://api.github.com/repos/sabhineet/computational-physics-library/contents`;
+const _ghCache = {};
+
+async function _ghFetch(path) {
+  if (_ghCache[path]) return _ghCache[path];
+  try {
+    const res = await fetch(`${_API}/${path}`, {
+      headers: { Accept: 'application/vnd.github+json' },
+    });
+    if (!res.ok) {
+      console.warn(`[MCL] GitHub API HTTP ${res.status} for "${path}" — using static data only.`);
+      return null;
+    }
+    return (_ghCache[path] = await res.json());
+  } catch (err) {
+    console.warn(`[MCL] GitHub API unreachable (${path}):`, err.message);
+    return null;
+  }
+}
+
+function _filenameToTitle(name) {
+  return name
+    .replace(/\.[^.]+$/, '')
+    .replace(/[_\-]+/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+function _filenameToId(name) {
+  return name
+    .replace(/\.[^.]+$/, '')
+    .replace(/[_\s()\[\]]+/g, '-')
+    .replace(/[^a-zA-Z0-9-]/g, '')
+    .toLowerCase()
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function _autoProject(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  return {
+    id:          _filenameToId(filename),
+    title:       _filenameToTitle(filename),
+    description: `${_filenameToTitle(filename)} — numerical implementation.`,
+    file:        filename,
+    type:        ext,
+    language:    'Python',
+    author:      'abhineet',
+    method:      _filenameToTitle(filename),
+    output:      '— run the script to see output —',
+    tags:        [],
+    _auto:       true,
+  };
+}
+
+const _SUPPORTED = new Set(['py', 'ipynb', 'md']);
+const _SKIP      = new Set(['readme.md', 'index.html', 'license', 'license.md', '.gitignore']);
+
+async function _syncWithGitHub() {
+  const rootItems = await _ghFetch(_CODES);
+  if (!rootItems || !Array.isArray(rootItems)) return;
+
+  for (const folder of rootItems.filter(i => i.type === 'dir')) {
+    /* Find matching category by folder name (case-insensitive) */
+    let cat = MCL.categories.find(
+      c => c.folder.toLowerCase() === folder.name.toLowerCase()
+    );
+
+    const folderItems = await _ghFetch(`${_CODES}/${folder.name}`);
+    if (!folderItems || !Array.isArray(folderItems)) continue;
+
+    const codeFiles = folderItems.filter(item => {
+      if (item.type !== 'file') return false;
+      const ext  = item.name.split('.').pop().toLowerCase();
+      return _SUPPORTED.has(ext) && !_SKIP.has(item.name.toLowerCase());
+    });
+
+    if (cat) {
+      /* Add files not already listed in static data */
+      for (const file of codeFiles) {
+        const exists = cat.projects.some(
+          p => p.file.toLowerCase() === file.name.toLowerCase()
+        );
+        if (!exists) {
+          cat.projects.push(_autoProject(file.name));
+        }
+      }
+    } else {
+      /* Brand-new folder — create a category on the fly */
+      const title = folder.name.replace(/[_\-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      MCL.categories.push({
+        id:          folder.name.toLowerCase().replace(/[_\s]+/g, '-'),
+        name:        title,
+        folder:      folder.name,
+        icon:        '{}',
+        symbol:      '{}',
+        color:       '#94a3b8',
+        description: `${title} algorithms and implementations.`,
+        projects:    codeFiles.map(f => _autoProject(f.name)),
+        _auto:       true,
+      });
+    }
+  }
+
+  /* Recompute derived arrays after sync */
+  MCL.allProjects = MCL.categories.flatMap(cat =>
+    cat.projects.map(p => ({
+      ...p,
+      categoryId:    cat.id,
+      categoryName:  cat.name,
+      categoryIcon:  cat.icon,
+      categoryColor: cat.color,
+      categoryFolder:cat.folder,
+    }))
+  );
+  MCL.totalProjects   = MCL.allProjects.length;
+  MCL.totalCategories = MCL.categories.length;
+}
+
+/**
+ * MCL.ready — resolved Promise that page scripts should await
+ * before rendering the library or project views.
+ *
+ * Usage (in library.js / project.js):
+ *   MCL.ready.then(() => { buildSidebar(); renderLibrary(); });
+ */
+MCL.ready = _syncWithGitHub();
 
 /* GitHub SVG icon (inline, no external dep) */
 MCL.githubIcon = `<svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
