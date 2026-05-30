@@ -9,10 +9,15 @@
    CONFIGURATION
 ══════════════════════════════════════════════════════════ */
 const CONFIG = {
-  github: 'https://github.com/sabhineet/computational-physics-library',
-  raw:    'https://raw.githubusercontent.com/sabhineet/computational-physics-library/main',
-  codes:  'codes',
+  github:     'https://github.com/sabhineet/computational-physics-library',
+  raw:        'https://raw.githubusercontent.com/sabhineet/computational-physics-library/main',
+  githubApi:  'https://api.github.com/repos/sabhineet/computational-physics-library/contents',
+  codes:      'codes',
   catalogUrl: './catalog.json',
+  // File types the site knows how to render
+  supportedExts: new Set(['py', 'ipynb', 'md', 'html']),
+  // Files that should NOT become project entries
+  skipFiles: new Set(['readme.md', 'index.html', 'license', 'license.md', '.gitignore']),
 };
 
 /* ══════════════════════════════════════════════════════════
@@ -123,19 +128,161 @@ function dispatch(route) {
 }
 
 /* ══════════════════════════════════════════════════════════
-   CATALOG LOADER
+   CATALOG LOADER  +  GITHUB LIVE SYNC
 ══════════════════════════════════════════════════════════ */
+
+/**
+ * Load catalog.json (metadata) then merge with the live GitHub
+ * file tree so any new folders or .py files are discovered
+ * automatically — no manual catalog edits needed.
+ */
 async function loadCatalog() {
   try {
     const res = await fetch(CONFIG.catalogUrl);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.catalog = await res.json();
+    // Sync with live repo BEFORE first render
+    await syncWithGitHub();
     buildSearchIndex();
     return true;
   } catch (err) {
     console.error('Failed to load catalog.json:', err);
     return false;
   }
+}
+
+// ── GitHub Contents API cache (avoid duplicate fetches) ──
+const _ghCache = {};
+
+async function ghFetch(path) {
+  if (_ghCache[path]) return _ghCache[path];
+  try {
+    const res = await fetch(`${CONFIG.githubApi}/${path}`, {
+      headers: { Accept: 'application/vnd.github+json' },
+    });
+    if (!res.ok) {
+      // 403 = rate-limited, 404 = path doesn't exist — both are soft failures
+      console.warn(`[MYCODELAB] GitHub API: HTTP ${res.status} for ${path}`);
+      return null;
+    }
+    const data = await res.json();
+    _ghCache[path] = data;
+    return data;
+  } catch (err) {
+    console.warn(`[MYCODELAB] GitHub API unavailable (${path}):`, err.message);
+    return null;
+  }
+}
+
+// ── Helpers for auto-generating entries from filenames ──
+
+/** "Bisection_Method.py"  →  "Bisection Method" */
+function filenameToTitle(name) {
+  return name
+    .replace(/\.[^.]+$/, '')             // strip extension
+    .replace(/[_\-]+/g, ' ')             // underscores / dashes → spaces
+    .replace(/\b\w/g, c => c.toUpperCase()); // Title Case
+}
+
+/** "Bisection_Method.py"  →  "bisection-method" */
+function filenameToId(name) {
+  return name
+    .replace(/\.[^.]+$/, '')
+    .replace(/[_\s()[\]]+/g, '-')
+    .replace(/[^a-zA-Z0-9-]/g, '')
+    .toLowerCase()
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function autoProject(filename) {
+  const ext = filename.split('.').pop().toLowerCase();
+  return {
+    id:          filenameToId(filename),
+    title:       filenameToTitle(filename),
+    description: `${filenameToTitle(filename)} — numerical implementation.`,
+    file:        filename,
+    type:        ext,
+    tags:        [],
+    _auto:       true,   // flag so we can tell it was auto-discovered
+  };
+}
+
+function autoCategory(folderName, projects = []) {
+  const title = folderName.replace(/[_\-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  return {
+    id:          slugify(folderName),
+    title,
+    path:        folderName,
+    symbol:      '{}',
+    description: `${title} algorithms and implementations.`,
+    keywords:    [title.toLowerCase()],
+    projects,
+    _auto:       true,
+  };
+}
+
+/**
+ * syncWithGitHub()
+ *
+ * 1. Fetch codes/ directory listing from GitHub API
+ * 2. For every folder found:
+ *    a. If it matches a catalog category → fetch its files and
+ *       add any that aren't already in the catalog
+ *    b. If it's a brand-new folder → create a new category entry
+ *       with auto-generated project entries for each file
+ * 3. Update live stats counters
+ *
+ * Runs once at startup (awaited before first render).
+ * Silently degrades if the API is unreachable (rate-limited / offline).
+ */
+async function syncWithGitHub() {
+  const rootItems = await ghFetch(CONFIG.codes);
+  if (!rootItems || !Array.isArray(rootItems)) return; // API unavailable — use catalog only
+
+  const ghFolders = rootItems.filter(i => i.type === 'dir');
+
+  for (const folder of ghFolders) {
+    // Match against catalog by path name (case-insensitive)
+    let catEntry = state.catalog.categories.find(
+      c => c.path.toLowerCase() === folder.name.toLowerCase()
+    );
+
+    // Fetch this folder's file listing
+    const folderItems = await ghFetch(`${CONFIG.codes}/${folder.name}`);
+    if (!folderItems || !Array.isArray(folderItems)) continue;
+
+    // Collect renderable code files (skip README, index.html, etc.)
+    const codeFiles = folderItems.filter(item => {
+      if (item.type !== 'file') return false;
+      const ext  = item.name.split('.').pop().toLowerCase();
+      const base = item.name.toLowerCase();
+      return CONFIG.supportedExts.has(ext) && !CONFIG.skipFiles.has(base);
+    });
+
+    if (catEntry) {
+      // ── Existing category: add any files not already catalogued ──
+      for (const file of codeFiles) {
+        const alreadyIn = catEntry.projects.some(
+          p => p.file.toLowerCase() === file.name.toLowerCase()
+        );
+        if (!alreadyIn) {
+          catEntry.projects.push(autoProject(file.name));
+        }
+      }
+    } else {
+      // ── New folder not in catalog.json at all: create it ──
+      const newProjects = codeFiles.map(f => autoProject(f.name));
+      state.catalog.categories.push(autoCategory(folder.name, newProjects));
+    }
+  }
+
+  // Recalculate live stats so the homepage counters are accurate
+  const totalProjects = state.catalog.categories.reduce(
+    (sum, c) => sum + c.projects.length, 0
+  );
+  state.catalog.meta.stats.projects   = totalProjects;
+  state.catalog.meta.stats.categories = state.catalog.categories.length;
 }
 
 function getCategoryById(id) {
