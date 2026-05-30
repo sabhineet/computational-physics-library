@@ -581,18 +581,18 @@ function renderHome() {
               <span class="doc-icon">▶</span> Installation
             </h3>
             <p class="doc-text">Clone the repository and navigate to any category folder:</p>
-            <div class="doc-code">git clone ${CONFIG.github}.git
+            <pre class="doc-code">git clone ${CONFIG.github}.git
 cd computational-physics-library
-pip install numpy scipy matplotlib</div>
+pip install numpy scipy matplotlib</pre>
             <p class="doc-text">Run any Python script directly:</p>
-            <div class="doc-code">cd codes/Root-Finding
-python Bisection_Method.py</div>
+            <pre class="doc-code">cd codes/Root-Finding
+python Bisection_Method.py</pre>
           </div>
           <div class="doc-block">
             <h3 class="doc-block-title">
               <span class="doc-icon">⊞</span> Repository Structure
             </h3>
-            <div class="doc-code">codes/
+            <pre class="doc-code">codes/
 ├── Root-Finding/
 │   ├── Bisection_Method.py
 │   ├── Newton_Raphson_Method.py
@@ -602,7 +602,7 @@ python Bisection_Method.py</div>
 │   └── LU_decomposition.py
 ├── Integration/
 ├── Differentiation/
-└── …</div>
+└── …</pre>
           </div>
           <div class="doc-block">
             <h3 class="doc-block-title">
@@ -622,10 +622,10 @@ python Bisection_Method.py</div>
             <h3 class="doc-block-title">
               <span class="doc-icon">⬡</span> Dependencies
             </h3>
-            <div class="doc-code">numpy     &gt;= 1.24   # Array operations
+            <pre class="doc-code">numpy     &gt;= 1.24   # Array operations
 scipy     &gt;= 1.11   # Scientific algorithms
 matplotlib &gt;= 3.7  # Visualization
-sympy     &gt;= 1.12   # Symbolic computation</div>
+sympy     &gt;= 1.12   # Symbolic computation</pre>
             <p class="doc-text" style="margin-top:10px">All codes target Python 3.10+. No additional build system required.</p>
           </div>
         </div>
