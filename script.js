@@ -141,23 +141,14 @@ async function loadCatalog() {
     const res = await fetch(CONFIG.catalogUrl);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     state.catalog = await res.json();
+    // Sync with live repo BEFORE first render
+    await syncWithGitHub();
     buildSearchIndex();
     return true;
   } catch (err) {
     console.error('Failed to load catalog.json:', err);
     return false;
   }
-}
-
-/**
- * Kick off GitHub sync in the background after initial render.
- * Re-renders the current route once sync completes so stats + new files appear.
- */
-async function syncWithGitHubBackground() {
-  await syncWithGitHub();
-  buildSearchIndex();
-  // Re-render current route silently so updated counts/projects show
-  if (state.currentRoute) dispatch(state.currentRoute);
 }
 
 // ── GitHub Contents API cache (avoid duplicate fetches) ──
@@ -290,9 +281,8 @@ async function syncWithGitHub() {
   const totalProjects = state.catalog.categories.reduce(
     (sum, c) => sum + c.projects.length, 0
   );
-  state.catalog.meta.stats.projects     = totalProjects;
-  state.catalog.meta.stats.categories   = state.catalog.categories.length;
-  state.catalog.meta.stats.contributors = state.catalog.contributors.length;
+  state.catalog.meta.stats.projects   = totalProjects;
+  state.catalog.meta.stats.categories = state.catalog.categories.length;
 }
 
 function getCategoryById(id) {
@@ -522,7 +512,7 @@ function renderHome() {
             <span class="stat-label">Categories</span>
           </div>
           <div class="hero-stat">
-            <span class="stat-num">${contributors.length}</span>
+            <span class="stat-num">${meta.stats.contributors}</span>
             <span class="stat-label">Contributors</span>
           </div>
           <div class="hero-stat">
@@ -1047,7 +1037,7 @@ function renderAbout() {
     <div class="about-section">
       <p class="about-intro">
         MYCODELAB is an open-source archive of numerical methods and computational physics algorithms,
-        built and maintained by graduate physics students at UPES Dehradun, SPPU Pune, and the University of Sussex.
+        built and maintained by graduate physics students at UPES Dehradun and SPPU Pune.
         The library is intended as both a personal reference and a publicly accessible educational resource —
         offering clean, documented implementations of standard algorithms encountered in a graduate physics curriculum.
       </p>
@@ -1090,7 +1080,7 @@ function renderFooter() {
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2025 ${(state.catalog?.contributors || []).map(c => c.name).join(' & ')} · MIT License</span>
+        <span>© 2025 Abhineet Srivastava & Agnik Senroy · MIT License</span>
         <span>MYCODELAB · Computational Physics Library</span>
       </div>
     </footer>`;
@@ -1292,11 +1282,7 @@ async function init() {
     return;
   }
 
-  // Render immediately from local catalog — no spinner wait
   onRouteChange();
-
-  // Then sync GitHub in the background (silently updates stats + discovers new files)
-  syncWithGitHubBackground();
 }
 
 document.addEventListener('DOMContentLoaded', init);
