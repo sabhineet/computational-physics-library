@@ -403,10 +403,14 @@ function toggleSidebarMobile() {
    PAGE RENDERER HELPERS
 ══════════════════════════════════════════════════════════ */
 function showLoader() {
-  DOM.pageRoot.innerHTML = '';   // clear stale page so spinner is the only thing visible
-  DOM.pageLoader.hidden = false;
+  DOM.pageRoot.innerHTML = '';
+  DOM.pageLoader.removeAttribute('hidden');
+  DOM.pageLoader.style.display = 'flex';
 }
-function hideLoader() { DOM.pageLoader.hidden = true; }
+function hideLoader() {
+  DOM.pageLoader.setAttribute('hidden', '');
+  DOM.pageLoader.style.display = 'none';
+}
 
 function setPage(html) {
   hideLoader();
