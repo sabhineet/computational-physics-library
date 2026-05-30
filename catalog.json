@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "title": "MYCODELAB",
+    "subtitle": "Computational Physics Code Library",
+    "description": "A curated archive of numerical methods, computational algorithms, and scientific tools — built by physics students, for everyone.",
+    "github": "https://github.com/sabhineet/computational-physics-library",
+    "branch": "main",
+    "codesPath": "codes",
+    "stats": {
+      "projects": 9,
+      "categories": 9,
+      "contributors": 2,
+      "languages": 1
+    }
+  },
+  "contributors": [
+    {
+      "name": "Abhineet Srivastava",
+      "initials": "AS",
+      "institution": "UPES Dehradun",
+      "degree": "MSc Physics",
+      "github": "sabhineet",
+      "focus": "Numerical Methods · Root Finding · Linear Algebra",
+      "bio": "MSc Physics student specialising in numerical methods and computational algorithms. Primary maintainer of Root Finding and Linear Algebra modules.",
+      "tags": ["Python", "Numerical Methods", "Root Finding", "Linear Algebra"]
+    },
+    {
+      "name": "Agnik Senroy",
+      "initials": "AG",
+      "institution": "SPPU Pune",
+      "degree": "MSc Physics",
+      "github": "agniksr",
+      "focus": "Computational Physics · Data Analysis · Simulations",
+      "bio": "MSc Physics student focusing on computational simulations and data analysis. Primary maintainer of Data Analysis and Numerical Simulations modules.",
+      "tags": ["Python", "Data Analysis", "Simulations", "Fourier Methods"]
+    }
+  ],
+  "categories": [
+    {
+      "id": "root-finding",
+      "title": "Root Finding",
+      "path": "Root-Finding",
+      "symbol": "√",
+      "description": "Numerical methods for locating roots of equations. Covers bracketing methods (Bisection, Regula Falsi) and open methods (Newton-Raphson, Secant, Fixed-Point Iteration).",
+      "keywords": ["bisection", "newton", "secant", "fixed point", "regula falsi", "nonlinear"],
+      "projects": [
+        {
+          "id": "bisection-method",
+          "title": "Bisection Method",
+          "description": "Robust bracketing algorithm that halves the search interval at each step. Guaranteed convergence for continuous functions with a sign change.",
+          "file": "Bisection_Method.py",
+          "type": "py",
+          "tags": ["Bracketing", "Guaranteed Convergence", "Linear Rate"],
+          "complexity": "O(log((b-a)/ε))"
+        },
+        {
+          "id": "fixed-point-iteration",
+          "title": "Fixed Point Iteration",
+          "description": "Reformulates f(x)=0 as x=g(x) and iterates from an initial guess. Converges when |g'(x*)| < 1 near the root.",
+          "file": "Fixed_Point_Iteration.py",
+          "type": "py",
+          "tags": ["Open Method", "Iterative", "Linear Rate"]
+        },
+        {
+          "id": "newton-raphson-method",
+          "title": "Newton-Raphson Method",
+          "description": "Uses function value and derivative to achieve quadratic convergence. The fastest single-root method when a good initial guess is available.",
+          "file": "Newton_Raphson_Method.py",
+          "type": "py",
+          "tags": ["Open Method", "Derivative-Based", "Quadratic Rate"]
+        },
+        {
+          "id": "regula-falsi",
+          "title": "Regula Falsi Method",
+          "description": "Method of false position. Combines the guaranteed convergence of bisection with linear interpolation for faster approach to the root.",
+          "file": "Regula_Falsi_(Method_of_False_Position).py",
+          "type": "py",
+          "tags": ["Bracketing", "Linear Interpolation", "Guaranteed Convergence"]
+        },
+        {
+          "id": "secant-method",
+          "title": "Secant Method",
+          "description": "Approximates the derivative using a secant line through two prior iterates. Near-quadratic convergence without requiring explicit derivative computation.",
+          "file": "Secant_Method.py",
+          "type": "py",
+          "tags": ["Open Method", "Derivative-Free", "Superlinear Rate"]
+        }
+      ]
+    },
+    {
+      "id": "system-of-linear-equations",
+      "title": "System of Linear Equations",
+      "path": "System_of_Linear_Equations",
+      "symbol": "Ax",
+      "description": "Direct and iterative solvers for systems of the form Ax = b. Includes Gaussian elimination variants and LU matrix factorisation.",
+      "keywords": ["gauss", "elimination", "lu decomposition", "linear system", "matrix"],
+      "projects": [
+        {
+          "id": "gauss-elimination",
+          "title": "Gauss Elimination",
+          "description": "Row reduction method that transforms the augmented matrix [A|b] to upper triangular form, then solves via back substitution.",
+          "file": "Gauss_Elimination.py",
+          "type": "py",
+          "tags": ["Direct Method", "Row Reduction", "Back Substitution"]
+        },
+        {
+          "id": "gauss-jordan",
+          "title": "Gauss-Jordan Method",
+          "description": "Extended Gaussian elimination that reduces the augmented matrix to reduced row echelon form, yielding the solution directly.",
+          "file": "Gauss-Jordan.py",
+          "type": "py",
+          "tags": ["Direct Method", "RREF", "Matrix Inversion"]
+        },
+        {
+          "id": "gauss-seidel",
+          "title": "Gauss-Seidel Method",
+          "description": "Iterative solver that updates each variable using the most recently computed values. Useful for large sparse systems.",
+          "file": "Gauss-Seidel.py",
+          "type": "py",
+          "tags": ["Iterative Method", "Sparse Systems", "Convergence Criteria"]
+        },
+        {
+          "id": "lu-decomposition",
+          "title": "LU Decomposition",
+          "description": "Factorises matrix A into lower and upper triangular matrices. Efficient for solving multiple right-hand sides with the same coefficient matrix.",
+          "file": "LU_decomposition.py",
+          "type": "py",
+          "tags": ["Factorisation", "Multiple RHS", "Determinant"]
+        }
+      ]
+    },
+    {
+      "id": "integration",
+      "title": "Numerical Integration",
+      "path": "Integration",
+      "symbol": "∫",
+      "description": "Quadrature methods for approximating definite integrals. Includes Newton-Cotes formulas and Gaussian quadrature.",
+      "keywords": ["integration", "quadrature", "simpson", "trapezoid", "gaussian"],
+      "projects": []
+    },
+    {
+      "id": "differentiation",
+      "title": "Differentiation",
+      "path": "Differentiation",
+      "symbol": "∂",
+      "description": "Numerical differentiation using finite difference methods. Forward, backward, and central difference approximations.",
+      "keywords": ["differentiation", "finite difference", "derivative", "gradient"],
+      "projects": []
+    },
+    {
+      "id": "linear-algebra",
+      "title": "Linear Algebra",
+      "path": "Linear-Algebra",
+      "symbol": "M",
+      "description": "Matrix operations, eigenvalue problems, singular value decomposition, and numerical linear algebra algorithms.",
+      "keywords": ["eigenvalue", "matrix", "svd", "trace", "determinant", "algebra"],
+      "projects": []
+    },
+    {
+      "id": "odes",
+      "title": "Ordinary Differential Equations",
+      "path": "ODEs",
+      "symbol": "y′",
+      "description": "Initial value problem solvers including Euler, Runge-Kutta, and adaptive methods. Boundary value problem solvers.",
+      "keywords": ["ode", "runge-kutta", "euler", "initial value", "differential equation"],
+      "projects": []
+    },
+    {
+      "id": "fourier-methods",
+      "title": "Fourier Methods",
+      "path": "Fourier-Methods",
+      "symbol": "F̂",
+      "description": "Discrete Fourier transform, Fast Fourier Transform, power spectral density, and signal analysis techniques.",
+      "keywords": ["fourier", "fft", "spectral", "frequency", "signal", "transform"],
+      "projects": []
+    },
+    {
+      "id": "data-analysis",
+      "title": "Data Analysis",
+      "path": "Data-Analysis",
+      "symbol": "σ",
+      "description": "Statistical analysis, curve fitting, regression, error analysis, and data processing for experimental physics data.",
+      "keywords": ["statistics", "curve fitting", "regression", "error analysis", "data"],
+      "projects": []
+    },
+    {
+      "id": "numerical-simulations",
+      "title": "Numerical Simulations",
+      "path": "Numerical-Simulations",
+      "symbol": "Σ",
+      "description": "Physics simulations including N-body dynamics, Monte Carlo methods, molecular dynamics, and stochastic processes.",
+      "keywords": ["simulation", "monte carlo", "n-body", "molecular dynamics", "stochastic"],
+      "projects": []
+    }
+  ]
+}
