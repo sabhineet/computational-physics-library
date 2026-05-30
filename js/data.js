@@ -15,8 +15,8 @@ MCL.meta = {
   name:       'MYCODELAB',
   tagline:    'Computational Physics Code Archive',
   /* ★ UPDATE THIS to your real GitHub repo URL ★ */
-  github:     'https://github.com/ruru-99/computational-physics-library',
-  repoRaw:    'https://raw.githubusercontent.com/ruru-99/computational-physics-library/main',
+  github:     'https://github.com/sabhineet/computational-physics-library',
+  repoRaw:    'https://raw.githubusercontent.com/sabhineet/computational-physics-library/main',
 };
 
 /* ── CONTRIBUTORS ──────────────────────────────────────── */
@@ -27,8 +27,8 @@ MCL.contributors = [
     initials:        'AS',
     institution:     'UPES Dehradun',
     degree:          'MSc Physics',
-    github:          'ruru-99',
-    github_url:      'https://github.com/ruru-99',
+    github:          'sabhineet',
+    github_url:      'https://github.com/sabhineet',
     specializations: ['Numerical Methods', 'Root Finding', 'Linear Algebra', 'ODEs'],
     bio:             'MSc Physics candidate with research interests in computational methods, numerical analysis, and scientific computing. Focuses on robust algorithm implementation and mathematical rigour.',
   },
@@ -42,6 +42,17 @@ MCL.contributors = [
     github_url:      'https://github.com/agniksr',
     specializations: ['Fourier Methods', 'Data Analysis', 'Numerical Simulations', 'Differentiation'],
     bio:             'MSc Physics candidate specialising in signal processing, spectral analysis, and numerical simulation. Contributor to Fourier methods, data analysis, and differentiation modules.',
+  },
+  {
+  id:              'ruru',
+  name:            'Ruru Thakur',
+  initials:        'RT',
+  institution:     'University of Sussex',
+  degree:          'PhD Physics',
+  github:          'ruru-99',        // ← replace with her actual GitHub username
+  github_url:      'https://github.com/ruru-99',    // ← replace with her actual GitHub profile URL
+  specializations: ['Computational Physics'],  // ← update with her actual focus areas
+  bio:             'PhD researcher at the University of Sussex.',  // ← update as needed
   },
 ];
 
@@ -252,7 +263,7 @@ MCL.folderUrl = (cat, proj) =>
    Silently degrades if the API is rate-limited or offline.
 ══════════════════════════════════════════════════════════ */
 
-const _API  = `https://api.github.com/repos/ruru-99/computational-physics-library/contents`;
+const _API  = `https://api.github.com/repos/sabhineet/computational-physics-library/contents`;
 const _ghCache = {};
 
 async function _ghFetch(path) {
