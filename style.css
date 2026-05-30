@@ -389,6 +389,7 @@ input { font-family: inherit; }
 
 /* Loading state */
 .page-loader {
+  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -398,6 +399,8 @@ input { font-family: inherit; }
   font-size: 0.8rem;
   font-family: var(--font-mono);
 }
+/* Critical: CSS display:flex overrides the HTML `hidden` attribute.
+   This restores the correct behaviour so hideLoader() actually hides it. */
 .page-loader[hidden] {
   display: none !important;
 }

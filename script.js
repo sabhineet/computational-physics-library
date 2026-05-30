@@ -154,25 +154,13 @@ async function loadCatalog() {
  * Re-renders the current route once sync completes so stats + new files appear.
  */
 async function syncWithGitHubBackground() {
-  let success = false;
-
-  success = await syncWithGitHub();
-  if (!success) {
-    console.warn('[MYCODELAB] GitHub sync failed, retrying in 8s…');
-    await new Promise(r => setTimeout(r, 8000));
-    success = await syncWithGitHub();
-  }
-
-  if (success) {
-    buildSearchIndex();
-    if (state.currentRoute) dispatch(state.currentRoute);
-  } else {
-    console.warn('[MYCODELAB] GitHub sync unavailable — showing catalog.json only.');
-  }
+  await syncWithGitHub();
+  buildSearchIndex();
+  // Re-render current route silently so updated counts/projects show
+  if (state.currentRoute) dispatch(state.currentRoute);
 }
 
-// AFTER
-// Only successful responses are cached — failures are never stored so retries work.
+// ── GitHub Contents API cache (avoid duplicate fetches) ──
 const _ghCache = {};
 
 async function ghFetch(path) {
@@ -187,7 +175,7 @@ async function ghFetch(path) {
       return null;
     }
     const data = await res.json();
-    _ghCache[path] = data; // only cache success
+    _ghCache[path] = data;
     return data;
   } catch (err) {
     console.warn(`[MYCODELAB] GitHub API unavailable (${path}):`, err.message);
@@ -259,7 +247,7 @@ function autoCategory(folderName, projects = []) {
  */
 async function syncWithGitHub() {
   const rootItems = await ghFetch(CONFIG.codes);
-  if (!rootItems || !Array.isArray(rootItems)) return false; // API unavailable — use catalog only
+  if (!rootItems || !Array.isArray(rootItems)) return; // API unavailable — use catalog only
 
   const ghFolders = rootItems.filter(i => i.type === 'dir');
 
@@ -305,7 +293,6 @@ async function syncWithGitHub() {
   state.catalog.meta.stats.projects     = totalProjects;
   state.catalog.meta.stats.categories   = state.catalog.categories.length;
   state.catalog.meta.stats.contributors = state.catalog.contributors.length;
-  return true;
 }
 
 function getCategoryById(id) {
@@ -416,14 +403,10 @@ function toggleSidebarMobile() {
    PAGE RENDERER HELPERS
 ══════════════════════════════════════════════════════════ */
 function showLoader() {
-  DOM.pageRoot.innerHTML = '';
-  DOM.pageLoader.removeAttribute('hidden');
-  DOM.pageLoader.style.display = 'flex';
+  DOM.pageRoot.innerHTML = '';   // clear stale page so spinner is the only thing visible
+  DOM.pageLoader.hidden = false;
 }
-function hideLoader() {
-  DOM.pageLoader.setAttribute('hidden', '');
-  DOM.pageLoader.style.display = 'none';
-}
+function hideLoader() { DOM.pageLoader.hidden = true; }
 
 function setPage(html) {
   hideLoader();
