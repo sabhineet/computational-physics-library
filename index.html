@@ -3,133 +3,276 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MYCODELAB — Computational Physics Library</title>
-  <meta name="description" content="A curated archive of numerical methods, computational physics algorithms, and scientific tools." />
-
-  <!-- Fonts -->
+  <title>MYCODELAB — Computational Physics Archive</title>
+  <meta name="description" content="A curated repository of numerical methods, computational physics implementations, and scientific tools." />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/home.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;600&display=swap" rel="stylesheet" />
-
-  <!-- Prism.js syntax highlighting -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" />
-
-  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Mono:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
 </head>
 <body>
 
-  <!-- ════════════════ TOP NAVIGATION ════════════════ -->
-  <nav id="top-nav" role="navigation" aria-label="Primary navigation">
+  <!-- ══════════════ NAVBAR ══════════════ -->
+  <nav id="navbar" role="navigation" aria-label="Main navigation">
     <div class="nav-inner">
-
-      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
-
-      <a href="#/" class="nav-logo" aria-label="MYCODELAB home">
-        <span class="logo-mark">MCL</span>
-        <span class="logo-sep">·</span>
+      <a href="index.html" class="nav-logo" aria-label="MYCODELAB Home">
+        <span class="logo-mark">M</span>
         <span class="logo-name">MYCODELAB</span>
       </a>
-
-      <div class="nav-search-wrap" id="nav-search-wrap">
-        <button class="nav-search-btn" id="search-trigger" aria-label="Open search">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-          <span>Search methods, categories…</span>
-          <kbd>⌘K</kbd>
-        </button>
-      </div>
-
-      <ul class="nav-links" role="list">
-        <li><a href="#/" class="nav-link" data-route="home">Home</a></li>
-        <li><a href="#/library" class="nav-link" data-route="library">Library</a></li>
-        <li><a href="#/about" class="nav-link" data-route="about">About</a></li>
+      <ul class="nav-links" id="navLinks" role="list">
+        <li><a href="index.html" class="nav-link active">Home</a></li>
+        <li><a href="pages/library.html" class="nav-link">Library</a></li>
+        <li><a href="pages/docs.html" class="nav-link">Documentation</a></li>
+        <li><a href="pages/contributors.html" class="nav-link">Contributors</a></li>
         <li>
-          <a href="https://github.com/sabhineet/computational-physics-library"
-             target="_blank" rel="noopener noreferrer"
-             class="nav-link nav-gh">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          <a href="https://github.com/mycodelab" target="_blank" rel="noopener" class="nav-link nav-link--github">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
             GitHub
           </a>
         </li>
       </ul>
-
-      <button class="nav-toggle" id="nav-toggle" aria-label="Toggle mobile menu" aria-expanded="false">
+      <button class="nav-search-btn" id="searchTrigger" aria-label="Open search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <span>Search</span>
+        <kbd>⌘K</kbd>
+      </button>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
     </div>
-
-    <!-- Mobile menu -->
-    <div class="mobile-menu" id="mobile-menu" aria-hidden="true">
-      <a href="#/" class="mobile-link">Home</a>
-      <a href="#/library" class="mobile-link">Library</a>
-      <a href="#/about" class="mobile-link">About</a>
-      <a href="https://github.com/sabhineet/computational-physics-library" target="_blank" class="mobile-link">GitHub ↗</a>
-    </div>
   </nav>
 
-  <!-- ════════════════ APP SHELL ════════════════ -->
-  <div id="app-shell">
-
-    <!-- COLLAPSIBLE SIDEBAR -->
-    <aside id="sidebar" class="sidebar" aria-label="Repository navigation" aria-hidden="true">
-      <div class="sidebar-head">
-        <span class="sidebar-repo-label">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M3 9h18M9 21V9"/></svg>
-          sabhineet / computational-physics-library
-        </span>
-      </div>
-      <nav id="sidebar-nav" class="sidebar-nav" aria-label="Category and project navigation">
-        <!-- populated by JS -->
-      </nav>
-    </aside>
-
-    <!-- SIDEBAR BACKDROP (mobile) -->
-    <div id="sidebar-backdrop" class="sidebar-backdrop" aria-hidden="true"></div>
-
-    <!-- MAIN CONTENT AREA -->
-    <main id="main-content" class="main-content" role="main">
-
-      <!-- Loading state -->
-      <div id="page-loader" class="page-loader" aria-live="polite" aria-label="Loading content" hidden>
-        <div class="loader-ring"></div>
-        <span>Loading…</span>
-      </div>
-
-      <!-- Page content rendered here by JS -->
-      <div id="page-root"></div>
-
-    </main>
-
-  </div>
-
-  <!-- ════════════════ SEARCH OVERLAY ════════════════ -->
-  <div id="search-overlay" class="search-overlay" role="dialog" aria-modal="true" aria-label="Search" aria-hidden="true">
+  <!-- ══════════════ SEARCH OVERLAY ══════════════ -->
+  <div class="search-overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-label="Search" hidden>
     <div class="search-modal">
-      <div class="search-input-row">
-        <svg class="search-modal-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-        <input type="text" id="search-input" class="search-input" placeholder="Search methods, categories, algorithms…" autocomplete="off" aria-label="Search query" />
-        <kbd class="search-esc-hint">Esc</kbd>
+      <div class="search-input-wrap">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="searchInput" placeholder="Search categories, methods, files…" autocomplete="off" spellcheck="false" aria-label="Search query" />
+        <button class="search-close" id="searchClose" aria-label="Close search">Esc</button>
       </div>
-      <div id="search-results" class="search-results" role="listbox" aria-label="Search results">
-        <div class="search-empty">
-          <p>Start typing to search the library…</p>
-        </div>
-      </div>
+      <div class="search-results" id="searchResults" aria-live="polite"></div>
       <div class="search-footer">
         <span><kbd>↑↓</kbd> navigate</span>
         <span><kbd>↵</kbd> open</span>
         <span><kbd>Esc</kbd> close</span>
       </div>
     </div>
-    <div class="search-backdrop" id="search-backdrop"></div>
   </div>
 
-  <!-- ════════════════ SCRIPTS ════════════════ -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
-  <script src="script.js"></script>
+  <!-- ══════════════ HERO ══════════════ -->
+  <section class="hero" id="home" aria-labelledby="hero-title">
+    <div class="hero-grid-bg" aria-hidden="true"></div>
+    <div class="hero-inner">
+      <div class="hero-content">
+        <p class="hero-eyebrow">
+          <span class="eyebrow-dot" aria-hidden="true"></span>
+          Computational Physics · Scientific Code Archive
+        </p>
+        <h1 class="hero-title" id="hero-title">
+          <span class="title-word">MY</span><span class="title-word title-word--accent">CODE</span><span class="title-word">LAB</span>
+        </h1>
+        <p class="hero-description">
+          A structured archive of numerical methods, computational physics implementations, and scientific algorithms — developed by MSc Physics students at UPES Dehradun and SPPU Pune.
+        </p>
+        <div class="hero-stats" aria-label="Repository statistics">
+          <div class="stat-item">
+            <span class="stat-number" data-target="24" aria-label="24 implementations">0</span>
+            <span class="stat-label">Implementations</span>
+          </div>
+          <div class="stat-sep" aria-hidden="true"></div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="9" aria-label="9 categories">0</span>
+            <span class="stat-label">Categories</span>
+          </div>
+          <div class="stat-sep" aria-hidden="true"></div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="2" aria-label="2 contributors">0</span>
+            <span class="stat-label">Contributors</span>
+          </div>
+          <div class="stat-sep" aria-hidden="true"></div>
+          <div class="stat-item">
+            <span class="stat-number" data-target="2" aria-label="2 institutions">0</span>
+            <span class="stat-label">Institutions</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <a href="pages/library.html" class="btn btn--primary">Browse Library</a>
+          <a href="https://github.com/mycodelab" target="_blank" rel="noopener" class="btn btn--outline">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+            View on GitHub
+          </a>
+        </div>
+      </div>
+      <div class="hero-terminal" aria-hidden="true">
+        <div class="terminal-chrome">
+          <span class="t-dot t-dot--red"></span>
+          <span class="t-dot t-dot--yellow"></span>
+          <span class="t-dot t-dot--green"></span>
+          <span class="t-chrome-title">mycodelab — python3</span>
+        </div>
+        <div class="terminal-body" id="terminalBody"></div>
+      </div>
+    </div>
+  </section>
 
+  <!-- ══════════════ CATEGORIES ══════════════ -->
+  <section class="section section--categories" id="categories" aria-labelledby="categories-heading">
+    <div class="container">
+      <header class="section-header">
+        <span class="section-index" aria-hidden="true">01</span>
+        <div>
+          <h2 class="section-title" id="categories-heading">Repository Categories</h2>
+          <p class="section-desc">Browse by computational domain. Each category contains algorithm implementations, derivations, and worked examples.</p>
+        </div>
+        <a href="pages/library.html" class="section-link">View all →</a>
+      </header>
+      <div class="categories-grid" id="categoriesGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ FEATURED PROJECTS ══════════════ -->
+  <section class="section section--projects" id="projects" aria-labelledby="projects-heading">
+    <div class="container">
+      <header class="section-header">
+        <span class="section-index" aria-hidden="true">02</span>
+        <div>
+          <h2 class="section-title" id="projects-heading">Recent Implementations</h2>
+          <p class="section-desc">Individual code archives with source, metadata, and documentation.</p>
+        </div>
+        <a href="pages/library.html" class="section-link">Full archive →</a>
+      </header>
+      <div class="projects-grid" id="projectsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ CONTRIBUTORS ══════════════ -->
+  <section class="section section--contributors" id="contributors" aria-labelledby="contributors-heading">
+    <div class="container">
+      <header class="section-header">
+        <span class="section-index" aria-hidden="true">03</span>
+        <div>
+          <h2 class="section-title" id="contributors-heading">Contributors</h2>
+          <p class="section-desc">The researchers maintaining this archive.</p>
+        </div>
+        <a href="pages/contributors.html" class="section-link">Full profiles →</a>
+      </header>
+      <div class="contributors-grid" id="contributorsGrid">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ GETTING STARTED ══════════════ -->
+  <section class="section section--getstarted" id="docs" aria-labelledby="docs-heading">
+    <div class="container">
+      <header class="section-header">
+        <span class="section-index" aria-hidden="true">04</span>
+        <div>
+          <h2 class="section-title" id="docs-heading">Getting Started</h2>
+          <p class="section-desc">Clone, run, and contribute to this repository.</p>
+        </div>
+        <a href="pages/docs.html" class="section-link">Full docs →</a>
+      </header>
+      <div class="getstarted-grid">
+        <div class="gs-block">
+          <h3 class="gs-block-title">Clone &amp; Setup</h3>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash</span>
+              <button class="copy-btn" aria-label="Copy code">copy</button>
+            </div>
+            <pre><code>git clone https://github.com/mycodelab/repo.git
+cd mycodelab
+pip install -r requirements.txt</code></pre>
+          </div>
+        </div>
+        <div class="gs-block">
+          <h3 class="gs-block-title">Run a Script</h3>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">bash</span>
+              <button class="copy-btn" aria-label="Copy code">copy</button>
+            </div>
+            <pre><code>cd codes/Root-Finding/Bisection
+python Bisection_Method.py</code></pre>
+          </div>
+        </div>
+        <div class="gs-block">
+          <h3 class="gs-block-title">Repository Structure</h3>
+          <div class="code-block">
+            <div class="code-bar">
+              <span class="code-lang">tree</span>
+            </div>
+            <pre><code>mycodelab/
+├── codes/
+│   ├── Root-Finding/
+│   ├── Integration/
+│   ├── Linear-Algebra/
+│   ├── ODEs/
+│   ├── Fourier-Methods/
+│   ├── Data-Analysis/
+│   ├── Numerical-Simulations/
+│   ├── Differentiation/
+│   └── System_of_Linear_Equations/
+├── requirements.txt
+└── README.md</code></pre>
+          </div>
+        </div>
+        <div class="gs-block">
+          <h3 class="gs-block-title">Dependencies</h3>
+          <div class="dep-table">
+            <div class="dep-row"><span class="dep-pkg">numpy</span><span class="dep-ver">≥ 1.24</span><span class="dep-note">Array &amp; linear algebra</span></div>
+            <div class="dep-row"><span class="dep-pkg">scipy</span><span class="dep-ver">≥ 1.11</span><span class="dep-note">Scientific algorithms</span></div>
+            <div class="dep-row"><span class="dep-pkg">matplotlib</span><span class="dep-ver">≥ 3.7</span><span class="dep-note">Plotting &amp; visualisation</span></div>
+            <div class="dep-row"><span class="dep-pkg">sympy</span><span class="dep-ver">≥ 1.12</span><span class="dep-note">Symbolic computation</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════ FOOTER ══════════════ -->
+  <footer class="footer" role="contentinfo">
+    <div class="container">
+      <div class="footer-top">
+        <div class="footer-brand">
+          <span class="footer-logo-mark">M</span>
+          <span class="footer-logo-name">MYCODELAB</span>
+          <p class="footer-tagline">Computational Physics Code Archive</p>
+          <p class="footer-sub">Open-source scientific computing repository maintained by MSc Physics students.</p>
+        </div>
+        <nav class="footer-nav" aria-label="Footer navigation">
+          <div class="footer-nav-col">
+            <span class="footer-nav-head">Archive</span>
+            <a href="pages/library.html">Library</a>
+            <a href="pages/library.html#root-finding">Root Finding</a>
+            <a href="pages/library.html#integration">Integration</a>
+            <a href="pages/library.html#linear-algebra">Linear Algebra</a>
+            <a href="pages/library.html#odes">ODEs</a>
+          </div>
+          <div class="footer-nav-col">
+            <span class="footer-nav-head">Resources</span>
+            <a href="pages/docs.html">Documentation</a>
+            <a href="pages/contributors.html">Contributors</a>
+            <a href="https://github.com/mycodelab" target="_blank" rel="noopener">GitHub ↗</a>
+          </div>
+        </nav>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 Abhineet Srivastava &amp; Agnik Senroy · MIT License</span>
+        <span class="footer-inst">UPES Dehradun · SPPU Pune</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/render.js"></script>
+  <script src="js/search.js"></script>
+  <script src="js/home.js"></script>
 </body>
 </html>
