@@ -1,695 +1,1138 @@
-/* ═══════════════════════════════════════════════
-   PhysicsLab · Scientific Computing Repository
-   script.js — Data, Rendering, Interactivity
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   MYCODELAB — script.js
+   SPA Router · Content Renderers · Search Engine · GitHub Integration
+   ═══════════════════════════════════════════════════════════ */
 
 'use strict';
 
-/* ════════════════════════════════════
-   DATA LAYER
-════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   CONFIGURATION
+══════════════════════════════════════════════════════════ */
+const CONFIG = {
+  github: 'https://github.com/sabhineet/computational-physics-library',
+  raw:    'https://raw.githubusercontent.com/sabhineet/computational-physics-library/main',
+  codes:  'codes',
+  catalogUrl: './catalog.json',
+};
 
-const CATEGORIES = [
-  { id: 'numerical-integration', name: 'Numerical Integration', icon: '∫', glyph: 'dx', color: '#39d98a', count: 3 },
-  { id: 'differential-equations', name: 'Differential Equations', icon: '∂', glyph: 'dy', color: '#58a6ff', count: 4 },
-  { id: 'linear-algebra', name: 'Linear Algebra', icon: '⊗', glyph: 'Ax', color: '#bc8cff', count: 3 },
-  { id: 'root-finding', name: 'Root Finding', icon: '√', glyph: 'f(x)', color: '#f0a500', count: 2 },
-  { id: 'interpolation', name: 'Interpolation', icon: '≈', glyph: 'p(x)', color: '#ff7b72', count: 2 },
-  { id: 'fourier-methods', name: 'Fourier Methods', icon: 'ω', glyph: 'FFT', color: '#39d98a', count: 2 },
-  { id: 'data-analysis', name: 'Data Analysis', icon: 'σ', glyph: 'χ²', color: '#58a6ff', count: 3 },
-  { id: 'astrophysics', name: 'Astrophysics Codes', icon: '✦', glyph: 'GM', color: '#bc8cff', count: 3 },
-  { id: 'spectroscopy', name: 'Spectroscopy Tools', icon: '⚡', glyph: 'λ', color: '#f0a500', count: 2 },
-];
+/* ══════════════════════════════════════════════════════════
+   GLOBAL STATE
+══════════════════════════════════════════════════════════ */
+const state = {
+  catalog:       null,
+  currentRoute:  null,
+  sidebarOpen:   false,
+  searchOpen:    false,
+  searchIndex:   [],
+  searchFocusIdx: -1,
+};
 
-const PROJECTS = [
-  /* ── Numerical Integration ── */
-  {
-    id: 'simpson',
-    title: "Simpson's Rule Integration",
-    topic: 'Numerical Integration',
-    description: "Composite Simpson's 1/3 rule for definite integral approximation. Includes error estimation via Richardson extrapolation and comparison with exact analytic results.",
-    method: "Composite Simpson's Rule",
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "∫₀^π sin(x) dx ≈ 2.000000  [error < 1e-10]",
-  },
-  {
-    id: 'gauss-quad',
-    title: 'Gaussian Quadrature',
-    topic: 'Numerical Integration',
-    description: 'Gauss-Legendre quadrature nodes and weights up to order 20. Achieves near-machine-precision on smooth functions with far fewer evaluations than Newton-Cotes methods.',
-    method: 'Gauss-Legendre Quadrature',
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "∫₋₁¹ e^x dx ≈ 2.35040  (n=5 points, exact to 15 d.p.)",
-  },
-  {
-    id: 'monte-carlo',
-    title: 'Monte Carlo Integration',
-    topic: 'Numerical Integration',
-    description: 'Stochastic integration in 1D, 2D and 3D domains using importance sampling. Includes variance reduction techniques and convergence plots.',
-    method: 'Monte Carlo / Importance Sampling',
-    language: 'Julia',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "π ≈ 3.14159  (N=10⁶ samples, σ ≈ 0.0016)",
-  },
+/* ══════════════════════════════════════════════════════════
+   DOM REFERENCES
+══════════════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
 
-  /* ── Differential Equations ── */
-  {
-    id: 'rk4',
-    title: 'Runge-Kutta 4th Order',
-    topic: 'Differential Equations',
-    description: "Classic RK4 integrator for systems of first-order ODEs. Applied to the pendulum, Lotka-Volterra predator-prey model, and SIR epidemiological model.",
-    method: 'Runge-Kutta RK4',
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "Pendulum period: T ≈ 2.0066 s  (θ₀=15°, l=1m)",
-  },
-  {
-    id: 'finite-diff',
-    title: 'Finite Difference PDE Solver',
-    topic: 'Differential Equations',
-    description: 'Explicit and implicit finite difference schemes for 1D heat equation and wave equation. Includes stability analysis (CFL condition) and animated output.',
-    method: 'Finite Differences (FTCS, Crank-Nicolson)',
-    language: 'Julia',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "Heat diffusion stable for r = αΔt/Δx² ≤ 0.5",
-  },
-  {
-    id: 'shooting',
-    title: 'Shooting Method — BVP',
-    topic: 'Differential Equations',
-    description: 'Converts boundary value problems to IVP using Newton shooting. Solves quantum harmonic oscillator and buckling beam problems.',
-    method: 'Shooting Method + Newton Iteration',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Eigenvalues E_n = ℏω(n+½), n=0,1,2,... ✓",
-  },
-  {
-    id: 'verlet',
-    title: 'Velocity Verlet Integrator',
-    topic: 'Differential Equations',
-    description: "Symplectic integrator preserving phase-space volume for Hamiltonian systems. Applied to planetary orbits and molecular dynamics. Energy drift < 10⁻⁹ over 10⁵ steps.",
-    method: 'Velocity Verlet (Symplectic)',
-    language: 'C++',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "Total energy drift: ΔE/E₀ = 8.3×10⁻¹⁰ (kepler orbit)",
-  },
+const DOM = {
+  get appShell()     { return $('app-shell'); },
+  get pageRoot()     { return $('page-root'); },
+  get pageLoader()   { return $('page-loader'); },
+  get sidebar()      { return $('sidebar'); },
+  get sidebarNav()   { return $('sidebar-nav'); },
+  get sidebarBackdrop() { return $('sidebar-backdrop'); },
+  get sidebarToggle(){ return $('sidebar-toggle'); },
+  get navToggle()    { return $('nav-toggle'); },
+  get mobileMenu()   { return $('mobile-menu'); },
+  get topNav()       { return $('top-nav'); },
+  get searchOverlay(){ return $('search-overlay'); },
+  get searchInput()  { return $('search-input'); },
+  get searchResults(){ return $('search-results'); },
+  get searchTrigger(){ return $('search-trigger'); },
+  get searchBackdrop(){ return $('search-backdrop'); },
+};
 
-  /* ── Linear Algebra ── */
-  {
-    id: 'lu-decomp',
-    title: 'LU Decomposition',
-    topic: 'Linear Algebra',
-    description: 'Partial-pivot LU factorisation with forward/back substitution for solving Ax=b. Includes determinant calculation and matrix inversion via LU.',
-    method: 'LU Decomposition (Crout + Pivoting)',
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "||Ax - b|| = 2.84e-15  (1000×1000 random system)",
-  },
-  {
-    id: 'power-iter',
-    title: 'Power Iteration & Eigenvalues',
-    topic: 'Linear Algebra',
-    description: 'Power iteration, inverse iteration and QR algorithm for eigenvalue problems. Applied to quantum Hamiltonian matrices and coupled-oscillator systems.',
-    method: 'Power Iteration / QR Algorithm',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "λ_max = 4.0000 (5×5 tridiagonal H), error < 1e-12",
-  },
-  {
-    id: 'conjugate-grad',
-    title: 'Conjugate Gradient Solver',
-    topic: 'Linear Algebra',
-    description: 'Iterative CG solver for large sparse symmetric positive-definite systems. Used for finite-element discretisations of Poisson equation.',
-    method: 'Conjugate Gradient',
-    language: 'Julia',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "Converged in 87 iterations, residual = 3.1e-14",
-  },
+/* ══════════════════════════════════════════════════════════
+   UTILITIES
+══════════════════════════════════════════════════════════ */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
 
-  /* ── Root Finding ── */
-  {
-    id: 'newton-raphson',
-    title: 'Newton-Raphson Method',
-    topic: 'Root Finding',
-    description: 'Classic and modified Newton-Raphson for single-variable and multivariate root finding. Includes convergence basin visualisation (fractal boundary plots).',
-    method: 'Newton-Raphson',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Root of f(x)=x³-2x-5: x* = 2.09455148  (5 iters)",
-  },
-  {
-    id: 'bisection',
-    title: 'Bisection & Brent Method',
-    topic: 'Root Finding',
-    description: 'Guaranteed-convergence bisection combined with secant/inverse quadratic interpolation (Brent). Applied to resonance frequencies and Fermi energy calculation.',
-    method: "Bisection + Brent's Method",
-    language: 'MATLAB',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Fermi energy of Na: E_F ≈ 3.23 eV  (converged, tol=1e-10)",
-  },
+function slugify(str) {
+  return str.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+}
 
-  /* ── Interpolation ── */
-  {
-    id: 'cubic-spline',
-    title: 'Cubic Spline Interpolation',
-    topic: 'Interpolation',
-    description: 'Natural and clamped cubic spline interpolation with tridiagonal system solving. Demonstrates Runge phenomenon avoidance vs. polynomial interpolation.',
-    method: 'Cubic Splines',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Max error (20 nodes): 3.4e-7  vs polynomial 1.8e+2",
-  },
-  {
-    id: 'lagrange',
-    title: 'Lagrange & Newton Interpolation',
-    topic: 'Interpolation',
-    description: "Barycentric Lagrange formula and Newton's divided difference table. Chebyshev node placement for optimal polynomial interpolation.",
-    method: "Lagrange / Newton's Divided Differences",
-    language: 'MATLAB',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "Chebyshev nodes reduce max error by factor of ~600",
-  },
+function githubRawUrl(catPath, filename) {
+  return `${CONFIG.raw}/${CONFIG.codes}/${catPath}/${filename}`;
+}
 
-  /* ── Fourier Methods ── */
-  {
-    id: 'fft',
-    title: 'FFT Signal Analysis',
-    topic: 'Fourier Methods',
-    description: "Fast Fourier Transform for spectral analysis of astrophysical time-series data. Identifies periodic signals, power spectra, and applies windowing functions (Hann, Blackman).",
-    method: 'FFT (Cooley-Tukey)',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Dominant frequency: 1.247 Hz  (SNR = 34.2 dB)",
-  },
-  {
-    id: 'dft-convolution',
-    title: 'DFT Convolution & Filters',
-    topic: 'Fourier Methods',
-    description: 'Convolution theorem implementation for fast polynomial multiplication and digital filtering. Includes low-pass, high-pass and Gaussian smoothing kernels.',
-    method: 'DFT Convolution Theorem',
-    language: 'Julia',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Filter reduces noise σ from 0.34 → 0.02 (Gaussian kernel)",
-  },
+function githubBrowseUrl(catPath, filename) {
+  return `${CONFIG.github}/blob/main/${CONFIG.codes}/${catPath}/${filename}`;
+}
 
-  /* ── Data Analysis ── */
-  {
-    id: 'least-squares',
-    title: 'Least Squares Curve Fitting',
-    topic: 'Data Analysis',
-    description: 'Linear and nonlinear least squares with uncertainty propagation. Fits Planck blackbody curve to stellar spectral data to extract temperature.',
-    method: 'Least Squares (SVD + Levenberg-Marquardt)',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "T* = 5778 ± 12 K  (reduced χ² = 1.03)",
-  },
-  {
-    id: 'bootstrap',
-    title: 'Bootstrap Error Analysis',
-    topic: 'Data Analysis',
-    description: 'Non-parametric bootstrap resampling for uncertainty estimation in small experimental datasets. Constructs confidence intervals without Gaussian assumptions.',
-    method: 'Bootstrap Resampling',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "95% CI: [2.41, 2.49]  (N=10000 bootstrap samples)",
-  },
-  {
-    id: 'histogram',
-    title: 'Statistical Distribution Fitting',
-    topic: 'Data Analysis',
-    description: 'KDE and parametric distribution fitting (Gaussian, Poisson, Maxwell-Boltzmann) to experimental data. Includes Kolmogorov-Smirnov goodness-of-fit test.',
-    method: 'KDE + Maximum Likelihood Estimation',
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "KS test p-value = 0.41 (fail to reject Gaussian H₀)",
-  },
+function setTitle(t) {
+  document.title = t ? `${t} — MYCODELAB` : 'MYCODELAB — Computational Physics Library';
+}
 
-  /* ── Astrophysics ── */
-  {
-    id: 'nbody',
-    title: 'N-Body Gravitational Simulation',
-    topic: 'Astrophysics',
-    description: 'Direct N-body code with Barnes-Hut tree (O(N log N)) for gravitational simulations. Simulates star cluster evolution, planetary systems, and Kepler validation.',
-    method: 'Barnes-Hut Tree + Leapfrog',
-    language: 'C++',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "1000-body cluster: 10⁴ steps in 2.1s  (single core)",
-  },
-  {
-    id: 'stellar-structure',
-    title: 'Stellar Structure Equations',
-    topic: 'Astrophysics',
-    description: "Numerical integration of Lane-Emden equation for polytropic stellar models. Computes stellar radii, central densities, and mass-radius relations for polytropic indices n=0..5.",
-    method: 'Runge-Kutta + Shooting Method',
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "n=3 polytrope: ξ₁ = 6.897, θ'(ξ₁) = -0.04243",
-  },
-  {
-    id: 'orbital-mechanics',
-    title: 'Orbital Mechanics & Kepler',
-    topic: 'Astrophysics',
-    description: "Solves Kepler's equation via Newton iteration. Computes orbital elements from state vectors, propagates two-body orbits, and implements patched-conic interplanetary transfers.",
-    method: "Kepler's Equation + Orbital Mechanics",
-    language: 'Python',
-    author: 'Arjun Kapoor',
-    github: 'https://github.com',
-    output: "Earth→Mars Hohmann: Δv₁=2.94 km/s, Δv₂=2.65 km/s",
-  },
+/* ══════════════════════════════════════════════════════════
+   ROUTER
+══════════════════════════════════════════════════════════ */
+function parseRoute() {
+  const hash = window.location.hash.replace(/^#\/?/, '') || '';
+  const parts = hash.split('/').filter(Boolean);
+  if (!parts.length || parts[0] === '')        return { view: 'home' };
+  if (parts[0] === 'library')                  return { view: 'library' };
+  if (parts[0] === 'about')                    return { view: 'about' };
+  if (parts[0] === 'category' && parts[1])     return { view: 'category', catId: parts[1] };
+  if (parts[0] === 'project' && parts[1] && parts[2])
+                                               return { view: 'project', catId: parts[1], projId: parts[2] };
+  return { view: 'home' };
+}
 
-  /* ── Spectroscopy ── */
-  {
-    id: 'spectral-analysis',
-    title: 'Stellar Spectral Analysis',
-    topic: 'Spectroscopy',
-    description: 'Pipeline for stellar spectral analysis: continuum normalisation, radial velocity measurement via cross-correlation, equivalent width measurement, and spectral type classification.',
-    method: 'Cross-Correlation + Gaussian Fitting',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "RV = -21.3 ± 0.4 km/s  (Hα, Hβ, CaII K)",
-  },
-  {
-    id: 'peak-finder',
-    title: 'Spectral Peak Identification',
-    topic: 'Spectroscopy',
-    description: "Automated spectral line detection using wavelet transforms and matched filtering. Identifies atomic/molecular lines in noisy spectra and matches to NIST database.",
-    method: 'Wavelet Transform + Matched Filter',
-    language: 'Python',
-    author: 'Priya Sharma',
-    github: 'https://github.com',
-    output: "Detected 47/52 lines at SNR>3  (false pos. rate < 2%)",
-  },
-];
+function navigate(path) {
+  window.location.hash = path;
+}
 
+function onRouteChange() {
+  const route = parseRoute();
+  state.currentRoute = route;
+  dispatch(route);
+}
 
-/* ════════════════════════════════════
-   TERMINAL ANIMATION
-════════════════════════════════════ */
+function dispatch(route) {
+  // Close mobile menus on navigate
+  closeMobileMenu();
+  if (state.searchOpen) closeSearch();
 
-const TERMINAL_SCRIPT = [
-  { type: 'cmd',     text: 'ls physicslab/' },
-  { type: 'out',     text: 'numerical_integration/  differential_equations/' },
-  { type: 'out',     text: 'linear_algebra/  root_finding/  fourier_methods/' },
-  { type: 'out',     text: 'astrophysics/  spectroscopy/  data_analysis/' },
-  { type: 'cmd',     text: 'python astrophysics/nbody_sim.py --n 1000' },
-  { type: 'success', text: '✓ Loaded 1000 particles' },
-  { type: 'success', text: '✓ Barnes-Hut tree built  θ=0.5' },
-  { type: 'warn',    text: '⚡ Running 10000 steps...' },
-  { type: 'success', text: '✓ Done in 2.1s  |  ΔE/E₀ = 8.3e-10' },
-  { type: 'cmd',     text: 'python spectroscopy/spectral_analysis.py' },
-  { type: 'success', text: '✓ Continuum normalised' },
-  { type: 'success', text: '✓ RV = -21.3 ± 0.4 km/s' },
-  { type: 'cmd',     text: '' },   // cursor line
-];
-
-function buildTerminal () {
-  const body = document.getElementById('terminalBody');
-  if (!body) return;
-
-  let lineIndex = 0;
-  let charIndex = 0;
-  let isTyping = false;
-
-  function nextStep () {
-    if (lineIndex >= TERMINAL_SCRIPT.length) {
-      // restart after pause
-      setTimeout(() => {
-        body.innerHTML = '';
-        lineIndex = 0;
-        charIndex = 0;
-        nextStep();
-      }, 4000);
-      return;
-    }
-
-    const entry = TERMINAL_SCRIPT[lineIndex];
-
-    if (entry.type === 'cmd') {
-      // type out command character by character
-      if (charIndex === 0) {
-        const el = document.createElement('span');
-        el.className = 't-line';
-        el.innerHTML = `<span class="t-prompt">$ </span><span class="t-cmd" id="typing-${lineIndex}"></span><span class="cursor"></span>`;
-        body.appendChild(el);
-        body.scrollTop = body.scrollHeight;
-      }
-      const target = document.getElementById(`typing-${lineIndex}`);
-      const cursor = body.querySelector('.cursor');
-
-      if (charIndex < entry.text.length) {
-        if (target) target.textContent += entry.text[charIndex];
-        charIndex++;
-        setTimeout(nextStep, 50 + Math.random() * 40);
-      } else {
-        if (cursor) cursor.remove();
-        lineIndex++;
-        charIndex = 0;
-        setTimeout(nextStep, entry.text === '' ? 0 : 400);
-      }
-    } else {
-      // instant output
-      const cssClass = entry.type === 'success' ? 't-success' : entry.type === 'warn' ? 't-warn' : 't-out';
-      const el = document.createElement('span');
-      el.className = `t-line ${cssClass}`;
-      el.textContent = entry.text;
-      body.appendChild(el);
-      body.scrollTop = body.scrollHeight;
-      lineIndex++;
-      charIndex = 0;
-      setTimeout(nextStep, 80);
-    }
+  switch (route.view) {
+    case 'home':     renderHome();                         break;
+    case 'library':  renderLibrary();                      break;
+    case 'category': renderCategory(route.catId);          break;
+    case 'project':  renderProject(route.catId, route.projId); break;
+    case 'about':    renderAbout();                        break;
+    default:         renderHome();
   }
 
-  setTimeout(nextStep, 800);
-}
-
-
-/* ════════════════════════════════════
-   COUNTER ANIMATION
-════════════════════════════════════ */
-
-function animateCounters () {
-  const els = document.querySelectorAll('.stat-num[data-target]');
-  els.forEach(el => {
-    const target = parseInt(el.dataset.target, 10);
-    const duration = 1200;
-    const start = performance.now();
-    function frame (now) {
-      const progress = Math.min((now - start) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      el.textContent = Math.round(eased * target);
-      if (progress < 1) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
+  // Update active nav links
+  document.querySelectorAll('.nav-link[data-route]').forEach(a => {
+    a.classList.toggle('active', a.dataset.route === route.view);
   });
 }
 
-
-/* ════════════════════════════════════
-   RENDER CATEGORIES
-════════════════════════════════════ */
-
-function renderCategories () {
-  const grid = document.querySelector('.categories-grid');
-  if (!grid) return;
-
-  grid.innerHTML = CATEGORIES.map(cat => `
-    <div class="cat-card" data-cat="${cat.id}" style="--cat-color: ${cat.color}"
-         role="button" tabindex="0" aria-label="Filter by ${cat.name}">
-      <div class="cat-icon">${cat.icon}</div>
-      <div class="cat-name">${cat.name}</div>
-      <div class="cat-count">${cat.count} project${cat.count !== 1 ? 's' : ''}</div>
-      <span class="cat-glyph">${cat.glyph}</span>
-    </div>
-  `).join('');
-
-  // click → filter projects by topic
-  grid.querySelectorAll('.cat-card').forEach(card => {
-    const activate = () => {
-      const catId = card.dataset.cat;
-      const catObj = CATEGORIES.find(c => c.id === catId);
-      if (!catObj) return;
-
-      // scroll to projects
-      document.getElementById('projects').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-      // set topic filter
-      state.filters.topic = catObj.name;
-      updateTopicChips(catObj.name);
-      applyFilters();
-    };
-    card.addEventListener('click', activate);
-    card.addEventListener('keydown', e => e.key === 'Enter' && activate());
-  });
+/* ══════════════════════════════════════════════════════════
+   CATALOG LOADER
+══════════════════════════════════════════════════════════ */
+async function loadCatalog() {
+  try {
+    const res = await fetch(CONFIG.catalogUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    state.catalog = await res.json();
+    buildSearchIndex();
+    return true;
+  } catch (err) {
+    console.error('Failed to load catalog.json:', err);
+    return false;
+  }
 }
 
-
-/* ════════════════════════════════════
-   RENDER PROJECTS
-════════════════════════════════════ */
-
-function langClass (lang) {
-  const map = { Python: 'lang-python', Julia: 'lang-julia', 'C++': 'lang-cpp', MATLAB: 'lang-matlab' };
-  return map[lang] || 'lang-python';
+function getCategoryById(id) {
+  return state.catalog?.categories.find(c => c.id === id) || null;
 }
 
-function renderProjects (list) {
-  const grid = document.getElementById('projectsGrid');
-  const noRes = document.getElementById('noResults');
-  const count = document.getElementById('resultsCount');
-  if (!grid) return;
+function getProjectById(catId, projId) {
+  const cat = getCategoryById(catId);
+  return cat?.projects.find(p => p.id === projId) || null;
+}
 
-  if (list.length === 0) {
-    grid.innerHTML = '';
-    noRes.classList.remove('hidden');
-    count.textContent = 'No results';
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════════════════ */
+function renderSidebarNav(activeCatId = null, activeProjId = null) {
+  if (!state.catalog) return;
+  const nav = DOM.sidebarNav;
+  if (!nav) return;
+
+  nav.innerHTML = state.catalog.categories.map(cat => {
+    const isCatActive = cat.id === activeCatId;
+    const hasProjects  = cat.projects.length > 0;
+
+    const projectsHtml = hasProjects ? cat.projects.map(proj => {
+      const isProjActive = proj.id === activeProjId;
+      return `
+        <div class="sidebar-proj-link ${isProjActive ? 'active' : ''}"
+             onclick="navigate('#/project/${cat.id}/${proj.id}')"
+             title="${escapeHtml(proj.title)}">
+          <span class="sidebar-proj-dot"></span>
+          <span>${escapeHtml(proj.title)}</span>
+        </div>`;
+    }).join('') : '';
+
+    return `
+      <div class="sidebar-section">
+        <button class="sidebar-cat-btn ${isCatActive ? 'active' : ''} ${isCatActive && hasProjects ? 'expanded' : ''}"
+                onclick="handleSidebarCatClick(this, '${cat.id}')"
+                data-cat-id="${cat.id}">
+          <span class="sidebar-cat-symbol">${escapeHtml(cat.symbol)}</span>
+          <span class="sidebar-cat-name">${escapeHtml(cat.title)}</span>
+          ${hasProjects ? `<span class="sidebar-cat-count">${cat.projects.length}</span>` : ''}
+          ${hasProjects ? '<span class="sidebar-chevron">›</span>' : ''}
+        </button>
+        ${hasProjects ? `
+          <div class="sidebar-projects ${isCatActive ? 'open' : ''}" id="sp-${cat.id}">
+            ${projectsHtml}
+          </div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+function handleSidebarCatClick(btn, catId) {
+  const cat = getCategoryById(catId);
+  if (!cat) return;
+
+  if (cat.projects.length === 0) {
+    navigate(`#/category/${catId}`);
     return;
   }
 
-  noRes.classList.add('hidden');
-  count.textContent = `Showing ${list.length} project${list.length !== 1 ? 's' : ''}`;
+  const projsEl = document.getElementById(`sp-${catId}`);
+  const isExpanded = btn.classList.contains('expanded');
 
-  grid.innerHTML = list.map((p, i) => `
-    <article class="project-card" style="animation-delay:${i * 40}ms"
-             data-lang="${p.language}" data-topic="${p.topic}">
-      <div class="card-top">
-        <span class="card-topic-badge">${p.topic}</span>
-        <span class="card-lang-badge ${langClass(p.language)}">${p.language}</span>
+  // Collapse all others
+  document.querySelectorAll('.sidebar-cat-btn.expanded').forEach(b => {
+    if (b !== btn) {
+      b.classList.remove('expanded');
+      const otherId = b.dataset.catId;
+      const otherProjs = document.getElementById(`sp-${otherId}`);
+      if (otherProjs) otherProjs.classList.remove('open');
+    }
+  });
+
+  btn.classList.toggle('expanded', !isExpanded);
+  if (projsEl) projsEl.classList.toggle('open', !isExpanded);
+
+  navigate(`#/category/${catId}`);
+}
+
+function showSidebar(catId, projId) {
+  DOM.appShell.classList.add('has-sidebar');
+  renderSidebarNav(catId, projId);
+  // Auto-expand active category
+  if (catId) {
+    const btn = document.querySelector(`.sidebar-cat-btn[data-cat-id="${catId}"]`);
+    const projsEl = document.getElementById(`sp-${catId}`);
+    if (btn) btn.classList.add('expanded');
+    if (projsEl) projsEl.classList.add('open');
+  }
+}
+
+function hideSidebar() {
+  DOM.appShell.classList.remove('has-sidebar');
+  state.sidebarOpen = false;
+  DOM.sidebar.classList.remove('open');
+  DOM.sidebarBackdrop.classList.remove('visible');
+}
+
+function toggleSidebarMobile() {
+  state.sidebarOpen = !state.sidebarOpen;
+  DOM.sidebar.classList.toggle('open', state.sidebarOpen);
+  DOM.sidebarBackdrop.classList.toggle('visible', state.sidebarOpen);
+  DOM.sidebarToggle.setAttribute('aria-expanded', state.sidebarOpen);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PAGE RENDERER HELPERS
+══════════════════════════════════════════════════════════ */
+function showLoader() { DOM.pageLoader.hidden = false; }
+function hideLoader() { DOM.pageLoader.hidden = true; }
+
+function setPage(html) {
+  hideLoader();
+  DOM.pageRoot.innerHTML = html;
+  // Re-run Prism if available
+  if (window.Prism) Prism.highlightAll();
+  // Scroll to top
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function githubSvg(w = 14) {
+  return `<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>`;
+}
+
+function breadcrumbs(items) {
+  const parts = [{ label: '~/library', action: "navigate('#/library')" }, ...items];
+  return `<div class="breadcrumbs">
+    <span class="bc-link" onclick="navigate('#/')">home</span>
+    <span class="bc-sep">/</span>
+    ${parts.map((p, i) => i < parts.length - 1
+      ? `<span class="bc-link" onclick="${p.action}">${escapeHtml(p.label)}</span><span class="bc-sep">/</span>`
+      : `<span class="bc-current">${escapeHtml(p.label)}</span>`
+    ).join('')}
+  </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   HOME PAGE
+══════════════════════════════════════════════════════════ */
+function renderHome() {
+  setTitle('');
+  hideSidebar();
+
+  const cat = state.catalog;
+  if (!cat) { setPage('<div class="page-body"><p style="color:var(--text-muted);font-family:var(--font-mono)">Loading catalog…</p></div>'); return; }
+
+  const { meta, contributors, categories } = cat;
+
+  // Hero tree panel
+  const treeItems = categories.map((c, i) => {
+    const isLast = i === categories.length - 1;
+    const connector = isLast ? '└──' : '├──';
+    const count = c.projects.length;
+    return `<div class="tree-item" onclick="navigate('#/category/${c.id}')">
+      <span class="tree-connector">${connector}</span>
+      <span class="tree-icon">▸</span>
+      <span class="tree-name">${escapeHtml(c.path)}/</span>
+      ${count > 0
+        ? `<span class="tree-badge">${count} file${count > 1 ? 's' : ''}</span>`
+        : `<span class="tree-count">—</span>`}
+    </div>`;
+  }).join('');
+
+  // Category cards
+  const catCards = categories.map(c => `
+    <div class="category-card" onclick="navigate('#/category/${c.id}')">
+      <div class="cat-card-symbol">${escapeHtml(c.symbol)}</div>
+      <div class="cat-card-title">${escapeHtml(c.title)}</div>
+      <div class="cat-card-desc">${escapeHtml(c.description.slice(0, 120))}…</div>
+      <div class="cat-card-footer">
+        <span class="cat-card-count">
+          <span>${c.projects.length}</span> project${c.projects.length !== 1 ? 's' : ''}
+        </span>
+        <span class="cat-card-arrow">→</span>
       </div>
-      <h3 class="card-title">${p.title}</h3>
-      <p class="card-desc">${p.description}</p>
-      <div class="card-meta">
-        <div class="card-meta-row">
-          <span class="meta-key">method</span>
-          <span class="meta-val">${p.method}</span>
-        </div>
-        <div class="card-meta-row">
-          <span class="meta-key">language</span>
-          <span class="meta-val">${p.language}</span>
+    </div>
+  `).join('');
+
+  // Contributor cards
+  const contribCards = contributors.map(c => `
+    <div class="contributor-card">
+      <div class="contrib-header">
+        <div class="contrib-avatar">${escapeHtml(c.initials)}</div>
+        <div class="contrib-meta">
+          <div class="contrib-name">${escapeHtml(c.name)}</div>
+          <div class="contrib-institution">${escapeHtml(c.institution)}</div>
+          <div class="contrib-degree">${escapeHtml(c.degree)}</div>
         </div>
       </div>
-      <div class="card-output">${p.output}</div>
-      <div class="card-footer">
-        <span class="card-author">by ${p.author}</span>
-        <a href="${p.github}" target="_blank" rel="noopener" class="card-gh-link">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-          View Source
+      <div class="contrib-body">
+        <div class="contrib-focus">${escapeHtml(c.focus)}</div>
+        <p class="contrib-bio">${escapeHtml(c.bio)}</p>
+      </div>
+      <div class="contrib-tags">${c.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      <a href="https://github.com/${c.github}" target="_blank" rel="noopener" class="contrib-gh-link">
+        ${githubSvg(13)} github.com/${escapeHtml(c.github)}
+      </a>
+    </div>
+  `).join('');
+
+  setPage(`
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true"></div>
+      <div class="hero-content">
+        <div class="hero-eyebrow">
+          <span class="hero-eyebrow-dot"></span>
+          <span class="hero-eyebrow-text">Collaborative Scientific Computing Repository</span>
+        </div>
+        <h1 class="hero-title">
+          <span class="hero-title-line">My</span>
+          <span class="hero-title-italic">Code</span>
+          <span class="hero-title-sub">Laboratory</span>
+        </h1>
+        <p class="hero-desc">${escapeHtml(meta.description)}</p>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <span class="stat-num" id="stat-projects">${meta.stats.projects}</span>
+            <span class="stat-label">Projects</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-num">${meta.stats.categories}</span>
+            <span class="stat-label">Categories</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-num">${meta.stats.contributors}</span>
+            <span class="stat-label">Contributors</span>
+          </div>
+          <div class="hero-stat">
+            <span class="stat-num">${meta.stats.languages}</span>
+            <span class="stat-label">Languages</span>
+          </div>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-primary" onclick="navigate('#/library')">Browse Library</button>
+          <a href="${CONFIG.github}" target="_blank" rel="noopener" class="btn btn-outline">
+            ${githubSvg()} GitHub Repository
+          </a>
+        </div>
+      </div>
+      <div class="hero-panel" aria-hidden="true">
+        <div class="panel-header">
+          <div class="panel-dots">
+            <span class="panel-dot pd-red"></span>
+            <span class="panel-dot pd-amber"></span>
+            <span class="panel-dot pd-green"></span>
+          </div>
+          <span class="panel-title">Repository Index</span>
+        </div>
+        <div class="panel-body">
+          <div class="panel-path">
+            <span class="p-repo">sabhineet</span>
+            <span class="p-sep">/</span>
+            <span class="p-dir">computational-physics-library</span>
+            <span class="p-sep">/</span>
+            <span class="p-dir">codes</span>
+          </div>
+          ${treeItems}
+        </div>
+      </div>
+    </section>
+
+    <!-- CATEGORIES -->
+    <section class="home-section">
+      <div class="container">
+        <span class="section-label">01 — Library</span>
+        <h2 class="section-title">Repository Categories</h2>
+        <p class="section-desc">Browse by computational domain. Each category contains algorithm implementations, worked examples, and reference material.</p>
+        <div class="categories-grid">${catCards}</div>
+      </div>
+    </section>
+
+    <!-- CONTRIBUTORS -->
+    <section class="home-section">
+      <div class="container">
+        <span class="section-label">02 — Contributors</span>
+        <h2 class="section-title">Research Team</h2>
+        <p class="section-desc">Graduate physics students building and maintaining this archive as part of their academic work.</p>
+        <div class="contributors-grid">${contribCards}</div>
+      </div>
+    </section>
+
+    <!-- GETTING STARTED -->
+    <section class="home-section">
+      <div class="container">
+        <span class="section-label">03 — Documentation</span>
+        <h2 class="section-title">Getting Started</h2>
+        <p class="section-desc">Clone the repository and run any script locally. All code is self-contained and documented.</p>
+        <div class="docs-grid">
+          <div class="doc-block">
+            <h3 class="doc-block-title">
+              <span class="doc-icon">▶</span> Installation
+            </h3>
+            <p class="doc-text">Clone the repository and navigate to any category folder:</p>
+            <div class="doc-code">git clone ${CONFIG.github}.git
+cd computational-physics-library
+pip install numpy scipy matplotlib</div>
+            <p class="doc-text">Run any Python script directly:</p>
+            <div class="doc-code">cd codes/Root-Finding
+python Bisection_Method.py</div>
+          </div>
+          <div class="doc-block">
+            <h3 class="doc-block-title">
+              <span class="doc-icon">⊞</span> Repository Structure
+            </h3>
+            <div class="doc-code">codes/
+├── Root-Finding/
+│   ├── Bisection_Method.py
+│   ├── Newton_Raphson_Method.py
+│   └── README.md
+├── System_of_Linear_Equations/
+│   ├── Gauss_Elimination.py
+│   └── LU_decomposition.py
+├── Integration/
+├── Differentiation/
+└── …</div>
+          </div>
+          <div class="doc-block">
+            <h3 class="doc-block-title">
+              <span class="doc-icon">⊕</span> Contributing
+            </h3>
+            <ol class="steps-list">
+              ${['Fork the repository on GitHub and clone locally.',
+                 'Create a branch: <code>git checkout -b feature/method-name</code>',
+                 'Add your code to the appropriate category folder with a docstring.',
+                 'Include a brief README.md describing the algorithm and usage.',
+                 'Open a Pull Request — we review within 48 hours.']
+                .map((s, i) => `<li class="step-item"><span class="step-num">0${i+1}</span><span>${s}</span></li>`)
+                .join('')}
+            </ol>
+          </div>
+          <div class="doc-block">
+            <h3 class="doc-block-title">
+              <span class="doc-icon">⬡</span> Dependencies
+            </h3>
+            <div class="doc-code">numpy     &gt;= 1.24   # Array operations
+scipy     &gt;= 1.11   # Scientific algorithms
+matplotlib &gt;= 3.7  # Visualization
+sympy     &gt;= 1.12   # Symbolic computation</div>
+            <p class="doc-text" style="margin-top:10px">All codes target Python 3.10+. No additional build system required.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    ${renderFooter()}
+  `);
+}
+
+/* ══════════════════════════════════════════════════════════
+   LIBRARY PAGE
+══════════════════════════════════════════════════════════ */
+function renderLibrary() {
+  setTitle('Library');
+  hideSidebar();
+
+  const { categories } = state.catalog;
+  const totalProjects = categories.reduce((s, c) => s + c.projects.length, 0);
+
+  const catSections = categories.map(cat => {
+    const projRows = cat.projects.length > 0
+      ? cat.projects.map(p => projectRow(cat, p)).join('')
+      : `<div class="empty-state" style="padding:24px">
+           <span class="empty-icon" style="font-size:1.2rem">—</span>
+           <p class="empty-desc">Coming soon. <a href="${CONFIG.github}" target="_blank">Contribute on GitHub ↗</a></p>
+         </div>`;
+
+    return `
+      <div style="margin-bottom:48px">
+        <div style="display:flex;align-items:baseline;gap:14px;margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+          <span style="font-family:var(--font-mono);font-size:1.1rem;color:var(--accent)">${escapeHtml(cat.symbol)}</span>
+          <h2 style="font-family:var(--font-display);font-size:1.25rem;color:var(--text-primary);cursor:pointer"
+              onclick="navigate('#/category/${cat.id}')">${escapeHtml(cat.title)}</h2>
+          <span style="font-family:var(--font-mono);font-size:0.62rem;color:var(--text-muted);margin-left:auto">
+            ${cat.projects.length} project${cat.projects.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <p style="font-family:var(--font-body);font-size:0.84rem;color:var(--text-muted);margin-bottom:14px;line-height:1.7">
+          ${escapeHtml(cat.description)}
+        </p>
+        ${projRows}
+      </div>`;
+  }).join('');
+
+  setPage(`
+    <div class="page-header">
+      <div class="page-header-inner">
+        ${breadcrumbs([])}
+        <h1 class="page-title">Library</h1>
+        <p class="page-desc">All ${totalProjects} implementations across ${categories.length} computational domains.</p>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="lib-search-bar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Filter by name, tag, or description…" id="lib-filter" oninput="filterLibrary(this.value)" />
+      </div>
+      <div id="lib-body">${catSections}</div>
+    </div>
+    ${renderFooter()}
+  `);
+}
+
+function filterLibrary(query) {
+  const q = query.toLowerCase().trim();
+  const { categories } = state.catalog;
+
+  document.querySelectorAll('#lib-body > div').forEach((section, i) => {
+    const cat = categories[i];
+    if (!cat) return;
+    const rows = section.querySelectorAll('.project-row');
+    let visible = 0;
+
+    rows.forEach(row => {
+      const proj = cat.projects[parseInt(row.dataset.projIdx)];
+      if (!proj) return;
+      const match = !q
+        || proj.title.toLowerCase().includes(q)
+        || proj.description.toLowerCase().includes(q)
+        || (proj.tags || []).some(t => t.toLowerCase().includes(q));
+      row.style.display = match ? '' : 'none';
+      if (match) visible++;
+    });
+
+    const catMatch = !q || cat.title.toLowerCase().includes(q)
+                        || cat.description.toLowerCase().includes(q);
+    section.style.display = (catMatch || visible > 0) ? '' : 'none';
+  });
+}
+
+/* ══════════════════════════════════════════════════════════
+   CATEGORY PAGE
+══════════════════════════════════════════════════════════ */
+function renderCategory(catId) {
+  const cat = getCategoryById(catId);
+  if (!cat) { renderHome(); return; }
+
+  setTitle(cat.title);
+  showSidebar(catId, null);
+
+  const projRows = cat.projects.length > 0
+    ? `<div class="project-list">${cat.projects.map((p, i) => projectRow(cat, p, i)).join('')}</div>`
+    : `<div class="empty-state">
+         <span class="empty-icon">∅</span>
+         <h3 class="empty-title">No implementations yet</h3>
+         <p class="empty-desc">
+           This category is reserved for future content.<br>
+           <a href="${CONFIG.github}" target="_blank" rel="noopener">Contribute on GitHub ↗</a>
+         </p>
+       </div>`;
+
+  setPage(`
+    <div class="page-header">
+      <div class="page-header-inner">
+        ${breadcrumbs([{ label: cat.title, action: '' }])}
+        <h1 class="page-title">
+          <span style="font-family:var(--font-mono);color:var(--accent);font-size:0.6em;vertical-align:middle;margin-right:10px">${escapeHtml(cat.symbol)}</span>
+          ${escapeHtml(cat.title)}
+        </h1>
+        <p class="page-desc">${escapeHtml(cat.description)}</p>
+      </div>
+    </div>
+    <div class="page-body">
+      <div class="project-list-header">
+        <span class="list-label">IMPLEMENTATIONS</span>
+        <span class="list-count">${cat.projects.length} file${cat.projects.length !== 1 ? 's' : ''}</span>
+      </div>
+      ${projRows}
+    </div>
+    ${renderFooter()}
+  `);
+}
+
+function projectRow(cat, proj, idx = 0) {
+  const tags = (proj.tags || []).map(t => `<span class="proj-tag">${escapeHtml(t)}</span>`).join('');
+  return `
+    <div class="project-row" data-proj-idx="${idx}" onclick="navigate('#/project/${cat.id}/${proj.id}')">
+      <div>
+        <div class="proj-title">${escapeHtml(proj.title)}</div>
+        <div class="proj-desc">${escapeHtml(proj.description)}</div>
+        <div class="proj-tags">${tags}</div>
+      </div>
+      <div class="proj-actions">
+        <span class="proj-file-badge">.${proj.type}</span>
+        <a href="${githubBrowseUrl(cat.path, proj.file)}"
+           target="_blank" rel="noopener"
+           class="proj-gh-btn"
+           onclick="event.stopPropagation()">
+          ${githubSvg(11)} View on GitHub
         </a>
       </div>
-    </article>
-  `).join('');
+    </div>`;
 }
 
+/* ══════════════════════════════════════════════════════════
+   PROJECT PAGE
+══════════════════════════════════════════════════════════ */
+async function renderProject(catId, projId) {
+  const cat  = getCategoryById(catId);
+  const proj = getProjectById(catId, projId);
+  if (!cat || !proj) { renderCategory(catId); return; }
 
-/* ════════════════════════════════════
-   FILTER & SEARCH STATE
-════════════════════════════════════ */
+  setTitle(`${proj.title} — ${cat.title}`);
+  showSidebar(catId, projId);
+  showLoader();
 
-const state = {
-  query: '',
-  filters: { lang: 'all', topic: 'all' },
-};
+  // Prev/Next
+  const idx = cat.projects.findIndex(p => p.id === projId);
+  const prev = idx > 0 ? cat.projects[idx - 1] : null;
+  const next  = idx < cat.projects.length - 1 ? cat.projects[idx + 1] : null;
 
-function applyFilters () {
-  const q = state.query.toLowerCase().trim();
-  const { lang, topic } = state.filters;
+  const prevBtn = prev
+    ? `<div class="proj-nav-btn" onclick="navigate('#/project/${cat.id}/${prev.id}')">
+         <span class="proj-nav-dir">← Previous</span>
+         <span class="proj-nav-name">${escapeHtml(prev.title)}</span>
+       </div>` : '<div></div>';
+  const nextBtn = next
+    ? `<div class="proj-nav-btn next" onclick="navigate('#/project/${cat.id}/${next.id}')">
+         <span class="proj-nav-dir">Next →</span>
+         <span class="proj-nav-name">${escapeHtml(next.title)}</span>
+       </div>` : '<div></div>';
 
-  const result = PROJECTS.filter(p => {
-    const matchLang  = lang  === 'all' || p.language === lang;
-    const matchTopic = topic === 'all' || p.topic === topic;
-    const matchQuery = !q || [p.title, p.description, p.method, p.language, p.topic, p.author]
-      .some(field => field.toLowerCase().includes(q));
-    return matchLang && matchTopic && matchQuery;
-  });
+  const tags = (proj.tags || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('');
+  const ghUrl = githubBrowseUrl(cat.path, proj.file);
+  const rawUrl = githubRawUrl(cat.path, proj.file);
 
-  renderProjects(result);
-}
+  const header = `
+    <div class="project-header">
+      ${breadcrumbs([
+        { label: cat.title, action: `navigate('#/category/${cat.id}')` },
+        { label: proj.title, action: '' }
+      ])}
+      <div class="project-meta-row">
+        <span class="meta-badge ${proj.type}">.${proj.type}</span>
+        <span class="meta-badge">${escapeHtml(proj.file)}</span>
+        ${proj.complexity ? `<span class="meta-badge">${escapeHtml(proj.complexity)}</span>` : ''}
+      </div>
+      <h1 class="project-title">${escapeHtml(proj.title)}</h1>
+      <p class="project-description">${escapeHtml(proj.description)}</p>
+      <div class="proj-tags" style="margin-bottom:0">${tags}</div>
+      <div class="project-actions">
+        <a href="${ghUrl}" target="_blank" rel="noopener" class="btn btn-ghost">
+          ${githubSvg()} View on GitHub
+        </a>
+        <a href="${rawUrl}" download="${proj.file}" class="btn btn-ghost">
+          ↓ Download
+        </a>
+        <button class="btn btn-ghost" onclick="copyFileUrl('${rawUrl}')">⎘ Copy URL</button>
+      </div>
+    </div>`;
 
-function updateTopicChips (val) {
-  document.querySelectorAll('[data-filter="topic"]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.value === val || (val === 'all' && btn.dataset.value === 'all'));
-  });
-}
+  const navHtml = `<div class="proj-nav">${prevBtn}${nextBtn}</div>`;
 
-function initFilters () {
-  // search input
-  const input = document.getElementById('searchInput');
-  if (input) {
-    input.addEventListener('input', () => {
-      state.query = input.value;
-      applyFilters();
-    });
-    // keyboard shortcut ⌘K / ctrl+K
-    document.addEventListener('keydown', e => {
-      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
-        e.preventDefault();
-        input.focus();
-        input.select();
-      }
-    });
+  // Fetch and render content
+  let contentHtml = '';
+  try {
+    const res = await fetch(rawUrl);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const text = await res.text();
+    contentHtml = renderContentByType(proj.type, text, proj.file);
+  } catch (err) {
+    contentHtml = `
+      <div class="code-viewer">
+        <div class="fetch-error">
+          <span class="error-title">⚠ Could not fetch file</span>
+          <p>The file could not be retrieved from GitHub. Ensure the repository is public and the file path is correct.</p>
+          <code>${escapeHtml(rawUrl)}</code>
+          <p style="margin-top:10px">
+            <a href="${ghUrl}" target="_blank" rel="noopener" style="color:var(--accent)">View directly on GitHub ↗</a>
+          </p>
+        </div>
+      </div>`;
   }
 
-  // filter chips
-  document.querySelectorAll('.chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const filterKey = chip.dataset.filter;
-      const val = chip.dataset.value;
-
-      // update active chip in group
-      chip.closest('.filter-chips').querySelectorAll('.chip')
-        .forEach(c => c.classList.remove('active'));
-      chip.classList.add('active');
-
-      state.filters[filterKey] = val;
-      applyFilters();
-    });
-  });
+  setPage(header + contentHtml + navHtml + renderFooter());
 }
 
+function renderContentByType(type, text, filename) {
+  switch (type) {
+    case 'py':   return renderPythonViewer(text, filename);
+    case 'ipynb': {
+      try { return renderNotebookViewer(JSON.parse(text), filename); }
+      catch { return renderPythonViewer(text, filename); }
+    }
+    case 'md':   return renderMarkdownViewer(text);
+    case 'html': return renderEmbeddedHtml(text);
+    default:     return renderPythonViewer(text, filename);
+  }
+}
 
-/* ════════════════════════════════════
-   COPY BUTTONS
-════════════════════════════════════ */
+/* ── PYTHON VIEWER ─────────────────────────────────────── */
+function renderPythonViewer(code, filename) {
+  const escaped = escapeHtml(code);
+  const lineCount = code.split('\n').length;
+  return `
+    <div class="code-viewer">
+      <div class="viewer-toolbar">
+        <div class="toolbar-filename">
+          <span style="color:var(--text-muted)">python</span>
+          <span class="ext">${escapeHtml(filename)}</span>
+          <span style="color:var(--text-faint);font-size:0.62rem">${lineCount} lines</span>
+        </div>
+        <div class="toolbar-actions">
+          <button class="toolbar-btn" id="copy-code-btn" onclick="copyCode()">⎘ Copy</button>
+          <a href="${filename}" download class="toolbar-btn" style="text-decoration:none">↓ Raw</a>
+        </div>
+      </div>
+      <div class="viewer-code-wrap">
+        <pre class="language-python line-numbers"><code class="language-python" id="code-block">${escaped}</code></pre>
+      </div>
+    </div>`;
+}
 
-function initCopyButtons () {
-  document.querySelectorAll('.copy-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const code = btn.dataset.code || btn.closest('.code-block').querySelector('code').textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        btn.textContent = 'copied!';
-        btn.classList.add('copied');
-        setTimeout(() => {
-          btn.textContent = 'copy';
-          btn.classList.remove('copied');
-        }, 2000);
-      }).catch(() => {
-        btn.textContent = 'err';
-        setTimeout(() => { btn.textContent = 'copy'; }, 2000);
+async function copyCode() {
+  const el = document.getElementById('code-block');
+  if (!el) return;
+  try {
+    await navigator.clipboard.writeText(el.textContent);
+    const btn = document.getElementById('copy-code-btn');
+    if (btn) { btn.textContent = '✓ Copied'; btn.classList.add('copied'); }
+    setTimeout(() => {
+      if (btn) { btn.innerHTML = '⎘ Copy'; btn.classList.remove('copied'); }
+    }, 2000);
+  } catch { /* silent fail */ }
+}
+
+async function copyFileUrl(url) {
+  try { await navigator.clipboard.writeText(url); } catch { /* silent fail */ }
+}
+
+/* ── MARKDOWN VIEWER ───────────────────────────────────── */
+function renderMarkdownViewer(md) {
+  let html = '';
+  if (window.marked) {
+    marked.setOptions({ breaks: true, gfm: true });
+    html = marked.parse(md);
+  } else {
+    html = `<pre style="white-space:pre-wrap;font-family:var(--font-mono);font-size:0.8rem;color:var(--text-secondary)">${escapeHtml(md)}</pre>`;
+  }
+  return `<div class="md-viewer">${html}</div>`;
+}
+
+/* ── NOTEBOOK VIEWER ───────────────────────────────────── */
+function renderNotebookViewer(nb) {
+  if (!nb.cells || !Array.isArray(nb.cells)) {
+    return `<div class="code-viewer"><div class="fetch-error"><span class="error-title">Invalid notebook format</span></div></div>`;
+  }
+
+  const cells = nb.cells.map(cell => {
+    const src = Array.isArray(cell.source) ? cell.source.join('') : (cell.source || '');
+
+    if (cell.cell_type === 'markdown') {
+      const html = window.marked ? marked.parse(src) : `<pre>${escapeHtml(src)}</pre>`;
+      return `<div class="nb-cell nb-md-cell">${html}</div>`;
+    }
+
+    if (cell.cell_type === 'code') {
+      const highlighted = window.Prism
+        ? Prism.highlight(src, Prism.languages.python, 'python')
+        : escapeHtml(src);
+
+      let outputHtml = '';
+      if (cell.outputs && cell.outputs.length) {
+        outputHtml = cell.outputs.map(out => {
+          if (out.output_type === 'stream') {
+            const t = Array.isArray(out.text) ? out.text.join('') : (out.text || '');
+            return `<div class="nb-output"><pre>${escapeHtml(t)}</pre></div>`;
+          }
+          if (out.output_type === 'display_data' || out.output_type === 'execute_result') {
+            if (out.data?.['image/png']) {
+              return `<div class="nb-output"><img src="data:image/png;base64,${out.data['image/png']}" alt="cell output" /></div>`;
+            }
+            if (out.data?.['text/plain']) {
+              const t = Array.isArray(out.data['text/plain']) ? out.data['text/plain'].join('') : out.data['text/plain'];
+              return `<div class="nb-output"><pre>${escapeHtml(t)}</pre></div>`;
+            }
+          }
+          return '';
+        }).join('');
+      }
+
+      return `
+        <div class="nb-cell nb-code-cell">
+          <div class="nb-code-header">
+            <span class="nb-in-label">In</span>
+          </div>
+          <pre class="language-python"><code>${highlighted}</code></pre>
+          ${outputHtml}
+        </div>`;
+    }
+    return '';
+  }).join('');
+
+  return `<div class="nb-viewer">${cells}</div>`;
+}
+
+/* ── HTML EMBED ────────────────────────────────────────── */
+function renderEmbeddedHtml(html) {
+  return `
+    <div class="code-viewer">
+      <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;margin-bottom:12px;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted)">
+        ℹ Custom HTML content rendered below
+      </div>
+      <div style="background:#fff;border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border)">
+        <iframe srcdoc="${escapeHtml(html)}" style="width:100%;min-height:500px;border:none;display:block" title="Project HTML"></iframe>
+      </div>
+    </div>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ABOUT PAGE
+══════════════════════════════════════════════════════════ */
+function renderAbout() {
+  setTitle('About');
+  hideSidebar();
+
+  const { contributors, meta } = state.catalog;
+
+  const contribCards = contributors.map(c => `
+    <div class="contributor-card">
+      <div class="contrib-header">
+        <div class="contrib-avatar">${escapeHtml(c.initials)}</div>
+        <div class="contrib-meta">
+          <div class="contrib-name">${escapeHtml(c.name)}</div>
+          <div class="contrib-institution">${escapeHtml(c.institution)}</div>
+          <div class="contrib-degree">${escapeHtml(c.degree)}</div>
+        </div>
+      </div>
+      <div class="contrib-body">
+        <div class="contrib-focus">${escapeHtml(c.focus)}</div>
+        <p class="contrib-bio">${escapeHtml(c.bio)}</p>
+      </div>
+      <div class="contrib-tags">${c.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}</div>
+      <a href="https://github.com/${c.github}" target="_blank" rel="noopener" class="contrib-gh-link">
+        ${githubSvg(13)} github.com/${escapeHtml(c.github)}
+      </a>
+    </div>
+  `).join('');
+
+  setPage(`
+    <div class="page-header">
+      <div class="page-header-inner">
+        ${breadcrumbs([{ label: 'about', action: '' }])}
+        <h1 class="page-title">About MYCODELAB</h1>
+        <p class="page-desc">A collaborative computational physics code archive.</p>
+      </div>
+    </div>
+    <div class="about-section">
+      <p class="about-intro">
+        MYCODELAB is an open-source archive of numerical methods and computational physics algorithms,
+        built and maintained by graduate physics students at UPES Dehradun and SPPU Pune.
+        The library is intended as both a personal reference and a publicly accessible educational resource —
+        offering clean, documented implementations of standard algorithms encountered in a graduate physics curriculum.
+      </p>
+      <h2 class="about-h2">Contributors</h2>
+      <div class="contributors-grid">${contribCards}</div>
+      <div style="margin-top:48px;padding-top:32px;border-top:1px solid var(--border)">
+        <h2 class="about-h2">Repository</h2>
+        <p style="font-family:var(--font-body);font-size:0.9rem;color:var(--text-body);line-height:1.8;margin-bottom:16px">
+          All source code is available on GitHub under the MIT License. Contributions, corrections, and additions are welcome via pull request.
+        </p>
+        <a href="${CONFIG.github}" target="_blank" rel="noopener" class="btn btn-outline">
+          ${githubSvg()} ${CONFIG.github.replace('https://github.com/', 'github.com/')}
+        </a>
+      </div>
+    </div>
+    ${renderFooter()}
+  `);
+}
+
+/* ══════════════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════════════ */
+function renderFooter() {
+  return `
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <div class="footer-brand">
+          <div class="nav-logo" style="cursor:default">
+            <span class="logo-mark">MCL</span>
+            <span class="logo-sep">·</span>
+            <span class="logo-name">MYCODELAB</span>
+          </div>
+          <p>Open-source computational physics code archive. Built by physics students, for everyone.</p>
+        </div>
+        <div class="footer-links">
+          <a href="#/">Home</a>
+          <a href="#/library">Library</a>
+          <a href="#/about">About</a>
+          <a href="${CONFIG.github}" target="_blank" rel="noopener">GitHub ↗</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 Abhineet Srivastava & Agnik Senroy · MIT License</span>
+        <span>MYCODELAB · Computational Physics Library</span>
+      </div>
+    </footer>`;
+}
+
+/* ══════════════════════════════════════════════════════════
+   SEARCH ENGINE
+══════════════════════════════════════════════════════════ */
+function buildSearchIndex() {
+  state.searchIndex = [];
+  const { categories } = state.catalog;
+
+  categories.forEach(cat => {
+    // Category entry
+    state.searchIndex.push({
+      type: 'category',
+      title: cat.title,
+      symbol: cat.symbol,
+      context: 'Category',
+      keywords: [cat.title, ...(cat.keywords || [])],
+      action: `navigate('#/category/${cat.id}')`,
+    });
+    // Project entries
+    cat.projects.forEach(proj => {
+      state.searchIndex.push({
+        type: 'project',
+        title: proj.title,
+        symbol: cat.symbol,
+        context: cat.title,
+        keywords: [
+          proj.title, proj.description,
+          ...(proj.tags || []),
+          proj.file, proj.type,
+        ],
+        action: `navigate('#/project/${cat.id}/${proj.id}')`,
       });
     });
   });
 }
 
+function searchQuery(q) {
+  if (!q || q.length < 2) return [];
+  const ql = q.toLowerCase();
+  return state.searchIndex
+    .filter(item => item.keywords.some(k => k && k.toLowerCase().includes(ql)))
+    .slice(0, 12);
+}
 
-/* ════════════════════════════════════
-   NAVIGATION
-════════════════════════════════════ */
+function highlightMatch(str, q) {
+  if (!q) return escapeHtml(str);
+  const idx = str.toLowerCase().indexOf(q.toLowerCase());
+  if (idx === -1) return escapeHtml(str);
+  return escapeHtml(str.slice(0, idx))
+    + `<mark>${escapeHtml(str.slice(idx, idx + q.length))}</mark>`
+    + escapeHtml(str.slice(idx + q.length));
+}
 
-function initNav () {
-  const navbar  = document.getElementById('navbar');
-  const toggle  = document.getElementById('navToggle');
-  const navLinks = document.querySelector('.nav-links');
-  const allLinks = document.querySelectorAll('.nav-link');
+function renderSearchResults(q) {
+  const results = searchQuery(q);
+  const container = DOM.searchResults;
+  if (!container) return;
+  state.searchFocusIdx = -1;
 
-  // scroll shadow
+  if (!q || q.length < 2) {
+    container.innerHTML = '<div class="search-empty"><p>Start typing to search the library…</p></div>';
+    return;
+  }
+  if (!results.length) {
+    container.innerHTML = `<div class="search-empty"><p>No results for "<strong>${escapeHtml(q)}</strong>"</p></div>`;
+    return;
+  }
+
+  container.innerHTML = results.map((r, i) => `
+    <div class="search-result-item" tabindex="-1"
+         data-idx="${i}" data-action="${escapeHtml(r.action)}"
+         onclick="${r.action};closeSearch()">
+      <span class="sr-icon">${escapeHtml(r.symbol)}</span>
+      <div class="sr-body">
+        <div class="sr-title">${highlightMatch(r.title, q)}</div>
+        <div class="sr-context">${escapeHtml(r.context)}</div>
+      </div>
+      <span class="sr-type">${r.type}</span>
+    </div>
+  `).join('');
+}
+
+function openSearch() {
+  state.searchOpen = true;
+  DOM.searchOverlay.classList.add('visible');
+  DOM.searchOverlay.setAttribute('aria-hidden', 'false');
+  setTimeout(() => DOM.searchInput?.focus(), 50);
+}
+
+function closeSearch() {
+  state.searchOpen = false;
+  DOM.searchOverlay.classList.remove('visible');
+  DOM.searchOverlay.setAttribute('aria-hidden', 'true');
+  if (DOM.searchInput) DOM.searchInput.value = '';
+  if (DOM.searchResults) DOM.searchResults.innerHTML = '<div class="search-empty"><p>Start typing to search the library…</p></div>';
+}
+
+function navigateSearchResults(dir) {
+  const items = DOM.searchResults.querySelectorAll('.search-result-item');
+  if (!items.length) return;
+  items[state.searchFocusIdx]?.classList.remove('focused');
+  state.searchFocusIdx = Math.max(0, Math.min(items.length - 1, state.searchFocusIdx + dir));
+  items[state.searchFocusIdx]?.classList.add('focused');
+  items[state.searchFocusIdx]?.scrollIntoView({ block: 'nearest' });
+}
+
+function activateSearchResult() {
+  const items = DOM.searchResults.querySelectorAll('.search-result-item');
+  const item = state.searchFocusIdx >= 0 ? items[state.searchFocusIdx] : items[0];
+  if (item) item.click();
+}
+
+/* ══════════════════════════════════════════════════════════
+   NAVIGATION BAR SCROLL EFFECT
+══════════════════════════════════════════════════════════ */
+function initScrollEffect() {
   window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-    updateActiveLink();
+    DOM.topNav.classList.toggle('scrolled', window.scrollY > 20);
   }, { passive: true });
-
-  // mobile menu
-  if (toggle) {
-    toggle.addEventListener('click', () => {
-      navLinks.classList.toggle('open');
-    });
-  }
-
-  // close mobile menu on link click
-  allLinks.forEach(link => {
-    link.addEventListener('click', () => navLinks.classList.remove('open'));
-  });
-
-  // active link on scroll
-  function updateActiveLink () {
-    const sections = ['home', 'categories', 'projects', 'contributors', 'docs'];
-    let current = '';
-    sections.forEach(id => {
-      const el = document.getElementById(id);
-      if (el && window.scrollY >= el.offsetTop - 100) current = id;
-    });
-    allLinks.forEach(a => {
-      a.classList.toggle('active', a.getAttribute('href') === `#${current}`);
-    });
-  }
 }
 
-
-/* ════════════════════════════════════
-   INTERSECTION OBSERVER — Animate in
-════════════════════════════════════ */
-
-function initScrollReveal () {
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.style.opacity = '1';
-        e.target.style.transform = 'translateY(0)';
-        observer.unobserve(e.target);
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.cat-card, .contributor-card, .doc-block').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity .5s ease, transform .5s ease';
-    observer.observe(el);
-  });
+/* ══════════════════════════════════════════════════════════
+   MOBILE MENU
+══════════════════════════════════════════════════════════ */
+function closeMobileMenu() {
+  DOM.mobileMenu.classList.remove('open');
+  DOM.navToggle.setAttribute('aria-expanded', 'false');
 }
 
+/* ══════════════════════════════════════════════════════════
+   EVENT BINDINGS
+══════════════════════════════════════════════════════════ */
+function bindEvents() {
+  // Router
+  window.addEventListener('hashchange', onRouteChange);
 
-/* ════════════════════════════════════
-   COUNTER OBSERVER
-════════════════════════════════════ */
+  // Navbar scroll
+  initScrollEffect();
 
-function initCounterObserver () {
-  const target = document.querySelector('.hero-stats');
-  if (!target) return;
-  const obs = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      animateCounters();
-      obs.unobserve(target);
+  // Mobile hamburger
+  DOM.navToggle?.addEventListener('click', () => {
+    const isOpen = DOM.mobileMenu.classList.toggle('open');
+    DOM.navToggle.setAttribute('aria-expanded', isOpen);
+  });
+
+  // Sidebar toggle (mobile)
+  DOM.sidebarToggle?.addEventListener('click', toggleSidebarMobile);
+
+  // Sidebar backdrop (mobile close)
+  DOM.sidebarBackdrop?.addEventListener('click', () => {
+    state.sidebarOpen = false;
+    DOM.sidebar.classList.remove('open');
+    DOM.sidebarBackdrop.classList.remove('visible');
+  });
+
+  // Search trigger
+  DOM.searchTrigger?.addEventListener('click', openSearch);
+  DOM.searchBackdrop?.addEventListener('click', closeSearch);
+
+  // Search input
+  DOM.searchInput?.addEventListener('input', e => renderSearchResults(e.target.value));
+  DOM.searchInput?.addEventListener('keydown', e => {
+    if (e.key === 'Escape')     closeSearch();
+    if (e.key === 'ArrowDown')  { e.preventDefault(); navigateSearchResults(1); }
+    if (e.key === 'ArrowUp')    { e.preventDefault(); navigateSearchResults(-1); }
+    if (e.key === 'Enter')      activateSearchResult();
+  });
+
+  // Global keyboard
+  document.addEventListener('keydown', e => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+      e.preventDefault();
+      state.searchOpen ? closeSearch() : openSearch();
     }
-  }, { threshold: .5 });
-  obs.observe(target);
+    if (e.key === 'Escape' && state.searchOpen) closeSearch();
+  });
 }
 
+/* ══════════════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════════════ */
+async function init() {
+  bindEvents();
+  showLoader();
 
-/* ════════════════════════════════════
-   BOOT
-════════════════════════════════════ */
+  const ok = await loadCatalog();
+  if (!ok) {
+    DOM.pageRoot.innerHTML = `
+      <div style="padding:60px 32px;text-align:center;font-family:var(--font-mono);color:var(--text-muted)">
+        <div style="font-size:2rem;color:var(--text-faint);margin-bottom:16px">!</div>
+        <p>Could not load catalog.json.<br>
+        Ensure the file exists in the same directory as index.html.</p>
+      </div>`;
+    hideLoader();
+    return;
+  }
 
-document.addEventListener('DOMContentLoaded', () => {
-  renderCategories();
-  renderProjects(PROJECTS);
-  buildTerminal();
-  initFilters();
-  initCopyButtons();
-  initNav();
-  initScrollReveal();
-  initCounterObserver();
-});
+  onRouteChange();
+}
+
+document.addEventListener('DOMContentLoaded', init);
