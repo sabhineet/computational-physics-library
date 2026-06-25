@@ -1,25 +1,50 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+x = [0]
+y = [0]
+
+a = 0
+b = 0
 h = 0.5
-x = np.arange(0, 10, h)
-n = len(x)
+e0 = 0.0001
 
-y1 = np.zeros(n)
+while a < 10:
 
-for i in range(n-1):
+    if a + h > 10:
+        h = 10 - a
 
-    k1 = np.cos(x[i])
-    k2 = np.cos(x[i] + h/2)
-    k3 = np.cos(x[i] + h/2)
-    k4 = np.cos(x[i] + h)
+    k1 = np.cos(a)
+    k2 = np.cos(a + h/2)
+    k3 = np.cos(a + h/2)
+    k4 = np.cos(a + h)
 
-    y1[i+1] = y1[i] + h*(k1 + 2*k2 + 2*k3 + k4)/6
+    y4 = b + h*(k1 + 2*k2 + 2*k3 + k4)/6
 
-y = np.sin(x)
+    k5 = np.cos(a + h)
 
-plt.plot(x, y, 'k--', label='sin(x)')
-plt.plot(x, y1, 'ro-', label='RK4')
+    y5 = b + h*(k1 + 4*k2 + k4 + k5)/6
+
+    e = abs(y5 - y4)
+
+    if e < e0:
+
+        a = a + h
+        b = y4
+
+        x.append(a)
+        y.append(b)
+
+        h = h*1.5
+
+    else:
+        h = h/2
+
+x1 = np.linspace(0, 10, 200)
+y1 = np.sin(x1)
+
+plt.plot(x1, y1, 'k--', label='sin(x)')
+plt.plot(x, y, 'bo-', label='RK45')
 
 plt.xlabel('x')
 plt.ylabel('y')
