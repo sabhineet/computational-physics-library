@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   MYCODELAB — script.js
+   ITER AD ASTRA — script.js
    SPA Router · Content Renderers · Search Engine · GitHub Integration
    ═══════════════════════════════════════════════════════════ */
 
@@ -79,7 +79,7 @@ function githubBrowseUrl(catPath, filename) {
 }
 
 function setTitle(t) {
-  document.title = t ? `${t} — MYCODELAB` : 'MYCODELAB — Computational Physics Library';
+  document.title = t ? `${t} — Iter ad Astra` : 'Iter ad Astra — Computational Physics';
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -162,14 +162,14 @@ async function ghFetch(path) {
     });
     if (!res.ok) {
       // 403 = rate-limited, 404 = path doesn't exist — both are soft failures
-      console.warn(`[MYCODELAB] GitHub API: HTTP ${res.status} for ${path}`);
+      console.warn(`[ITER AD ASTRA] GitHub API: HTTP ${res.status} for ${path}`);
       return null;
     }
     const data = await res.json();
     _ghCache[path] = data;
     return data;
   } catch (err) {
-    console.warn(`[MYCODELAB] GitHub API unavailable (${path}):`, err.message);
+    console.warn(`[ITER AD ASTRA] GitHub API unavailable (${path}):`, err.message);
     return null;
   }
 }
@@ -494,12 +494,12 @@ function renderHome() {
       <div class="hero-content">
         <div class="hero-eyebrow">
           <span class="hero-eyebrow-dot"></span>
-          <span class="hero-eyebrow-text">Collaborative Scientific Computing Repository</span>
+          <span class="hero-eyebrow-text">Computational Physics · Personal Archive</span>
         </div>
         <h1 class="hero-title">
-          <span class="hero-title-line">My</span>
-          <span class="hero-title-italic">Code</span>
-          <span class="hero-title-sub">Laboratory</span>
+          <span class="hero-title-line">Iter</span>
+          <span class="hero-title-italic">ad</span>
+          <span class="hero-title-sub">Astra</span>
         </h1>
         <p class="hero-desc">${escapeHtml(meta.description)}</p>
         <div class="hero-stats">
@@ -563,8 +563,8 @@ function renderHome() {
     <section class="home-section">
       <div class="container">
         <span class="section-label">02 — Contributors</span>
-        <h2 class="section-title">Research Team</h2>
-        <p class="section-desc">Graduate physics students building and maintaining this archive as part of their academic work.</p>
+        <h2 class="section-title">The People Behind This</h2>
+        <p class="section-desc">Physics students and researchers who build and maintain this archive.</p>
         <div class="contributors-grid">${contribCards}</div>
       </div>
     </section>
@@ -600,20 +600,22 @@ python Bisection_Method.py</pre>
 ├── System_of_Linear_Equations/
 │   ├── Gauss_Elimination.py
 │   └── LU_decomposition.py
-├── Integration/
-├── Differentiation/
-└── …</pre>
+├── 🔬 Integration/          ← coming soon
+├── 📐 Differentiation/      ← coming soon
+├── 📊 Data-Analysis/        ← coming soon
+├── 🌀 ODEs/                 ← coming soon
+└── ✨ Numerical-Simulations/ ← coming soon</pre>
           </div>
           <div class="doc-block">
             <h3 class="doc-block-title">
-              <span class="doc-icon">⊕</span> Contributing
+              <span class="doc-icon">⊕</span> Adding New Code
             </h3>
             <ol class="steps-list">
-              ${['Fork the repository on GitHub and clone locally.',
-                 'Create a branch: <code>git checkout -b feature/method-name</code>',
-                 'Add your code to the appropriate category folder with a docstring.',
-                 'Include a brief README.md describing the algorithm and usage.',
-                 'Open a Pull Request — we review within 48 hours.']
+              ${['Drop your <code>.py</code> (or <code>.ipynb</code>) file into the right category folder in the repository.',
+                 'The website auto-discovers it via the GitHub API — no manual catalog edits needed.',
+                 'To add a description or tags, add an entry in <code>catalog.json</code> under the matching category.',
+                 'To add a brand-new category, just create a folder in <code>codes/</code> — the site picks it up automatically.',
+                 'Push to <code>main</code> and the change is live.']
                 .map((s, i) => `<li class="step-item"><span class="step-num">0${i+1}</span><span>${s}</span></li>`)
                 .join('')}
             </ol>
@@ -1030,23 +1032,30 @@ function renderAbout() {
     <div class="page-header">
       <div class="page-header-inner">
         ${breadcrumbs([{ label: 'about', action: '' }])}
-        <h1 class="page-title">About MYCODELAB</h1>
-        <p class="page-desc">A collaborative computational physics code archive.</p>
+        <h1 class="page-title">About Iter ad Astra</h1>
+        <p class="page-desc">The story behind the archive.</p>
       </div>
     </div>
     <div class="about-section">
       <p class="about-intro">
-        MYCODELAB is an open-source archive of numerical methods and computational physics algorithms,
-        built and maintained by graduate physics students at UPES Dehradun and SPPU Pune.
-        The library is intended as both a personal reference and a publicly accessible educational resource —
-        offering clean, documented implementations of standard algorithms encountered in a graduate physics curriculum.
+        <em>Iter ad Astra</em> — the journey to the stars. This is a personal archive of computational physics code,
+        started as a way to document the numerical methods and algorithms worked through during an MSc in Physics.
+        What began as a collection of root-finding scripts has grown into a growing library spanning linear algebra,
+        ODEs, data analysis, and numerical simulations, with more on the way.
       </p>
-      <h2 class="about-h2">Contributors</h2>
+      <p class="about-intro" style="margin-top:-24px">
+        This is not an institutional project. It is not affiliated with any organisation. It is simply a physicist's
+        notebook — made public in the hope that other students find it useful, whether they are working through the
+        same problems for the first time or looking for a clean reference implementation. All code is written to be
+        readable first, correct second, and fast third.
+      </p>
+      <h2 class="about-h2">The People</h2>
       <div class="contributors-grid">${contribCards}</div>
       <div style="margin-top:48px;padding-top:32px;border-top:1px solid var(--border)">
-        <h2 class="about-h2">Repository</h2>
+        <h2 class="about-h2">The Repository</h2>
         <p style="font-family:var(--font-body);font-size:0.9rem;color:var(--text-body);line-height:1.8;margin-bottom:16px">
-          All source code is available on GitHub under the MIT License. Contributions, corrections, and additions are welcome via pull request.
+          All source code lives on GitHub. This is a personal project — feel free to read the code, use it as
+          a reference, or open an issue if something looks wrong. Pull requests from fellow students are welcome.
         </p>
         <a href="${CONFIG.github}" target="_blank" rel="noopener" class="btn btn-outline">
           ${githubSvg()} ${CONFIG.github.replace('https://github.com/', 'github.com/')}
@@ -1066,11 +1075,11 @@ function renderFooter() {
       <div class="footer-inner">
         <div class="footer-brand">
           <div class="nav-logo" style="cursor:default">
-            <span class="logo-mark">MCL</span>
+            <span class="logo-mark">IAA</span>
             <span class="logo-sep">·</span>
-            <span class="logo-name">MYCODELAB</span>
+            <span class="logo-name">ITER AD ASTRA</span>
           </div>
-          <p>Open-source computational physics code archive. Built by physics students, for everyone.</p>
+          <p>A personal computational physics archive. One physicist's journey through numerical methods and simulations.</p>
         </div>
         <div class="footer-links">
           <a href="#/">Home</a>
@@ -1080,8 +1089,8 @@ function renderFooter() {
         </div>
       </div>
       <div class="footer-bottom">
-        <span>© 2025 Abhineet Srivastava & Agnik Senroy · MIT License</span>
-        <span>MYCODELAB · Computational Physics Library</span>
+        <span>© 2025 Abhineet Srivastava, Agnik Senroy & Ruru Thakur · Personal Project</span>
+        <span>Iter ad Astra · Computational Physics</span>
       </div>
     </footer>`;
 }

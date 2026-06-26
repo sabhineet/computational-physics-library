@@ -1,8 +1,8 @@
 {
   "meta": {
-    "title": "MYCODELAB",
+    "title": "Iter ad Astra",
     "subtitle": "Computational Physics Code Library",
-    "description": "A curated archive of numerical methods, computational algorithms, and scientific tools \u2014 built by physics students, for everyone.",
+    "description": "One physicist's journey through computational physics.",
     "github": "https://github.com/sabhineet/computational-physics-library",
     "branch": "main",
     "codesPath": "codes",
@@ -20,13 +20,15 @@
       "institution": "UPES Dehradun",
       "degree": "MSc Physics",
       "github": "sabhineet",
-      "focus": "Numerical Methods \u00b7 Root Finding \u00b7 Linear Algebra",
-      "bio": "MSc Physics student specialising in numerical methods and computational algorithms. Primary maintainer of Root Finding and Linear Algebra modules.",
+      "focus": "Data Analysis · Numerical Solutions · Differentiation · ODEs",
+      "bio": "MSc Physics student at UPES Dehradun, working across the full numerical spectrum — from differentiation and ODE solvers to data analysis and linear algebra. Writes clean, well-documented Python and is equally comfortable on Linux and Windows. Primary maintainer of the Root Finding and Linear Algebra modules.",
       "tags": [
         "Python",
+        "Linux",
         "Numerical Methods",
-        "Root Finding",
-        "Linear Algebra"
+        "Data Analysis",
+        "ODEs",
+        "Differentiation"
       ]
     },
     {
@@ -35,13 +37,15 @@
       "institution": "SPPU Pune",
       "degree": "MSc Physics",
       "github": "agniksr",
-      "focus": "Computational Physics \u00b7 Data Analysis \u00b7 Simulations",
-      "bio": "MSc Physics student focusing on computational simulations and data analysis. Primary maintainer of Data Analysis and Numerical Simulations modules.",
+      "focus": "Numerical Methods · Simulations · Multi-language",
+      "bio": "MSc Physics student at SPPU Pune, covering the full range of numerical methods alongside physics simulations. Writes in Python, C++, and Fortran, and uses Mathematica for symbolic work. Primary maintainer of the Data Analysis and Numerical Simulations modules.",
       "tags": [
         "Python",
-        "Data Analysis",
-        "Simulations",
-        "Fourier Methods"
+        "C++",
+        "Fortran",
+        "Mathematica",
+        "Numerical Methods",
+        "Simulations"
       ]
     },
     {
@@ -50,13 +54,14 @@
       "institution": "University of Sussex",
       "degree": "PhD Scholar",
       "github": "ruru-99",
-      "focus": "Quantum Computing \u00b7 Monte Carlo Methods \u00b7 Stochastic Simulations",
-      "bio": "PhD scholar at the University of Sussex specialising in quantum computing and stochastic simulation methods. Primary contributor to Numerical Simulations and Fourier Methods modules.",
+      "focus": "Numerical Methods · Simulations · Quantum Computing",
+      "bio": "PhD scholar at the University of Sussex working on numerical methods, numerical simulations, and quantum computing. Proficient in multiple programming languages and brings rigour from research-level computational physics. Primary contributor to the Numerical Simulations and Fourier Methods modules.",
       "tags": [
         "Python",
+        "C++",
         "Quantum Computing",
         "Monte Carlo",
-        "Stochastic Methods"
+        "Numerical Methods"
       ]
     }
   ],
@@ -65,7 +70,7 @@
       "id": "root-finding",
       "title": "Root Finding",
       "path": "Root-Finding",
-      "symbol": "\u221a",
+      "symbol": "√",
       "description": "Numerical methods for locating roots of equations. Covers bracketing methods (Bisection, Regula Falsi) and open methods (Newton-Raphson, Secant, Fixed-Point Iteration).",
       "keywords": [
         "bisection",
@@ -87,7 +92,7 @@
             "Guaranteed Convergence",
             "Linear Rate"
           ],
-          "complexity": "O(log((b-a)/\u03b5))"
+          "complexity": "O(log((b-a)/ε))"
         },
         {
           "id": "fixed-point-iteration",
@@ -207,7 +212,7 @@
       "id": "integration",
       "title": "Numerical Integration",
       "path": "Integration",
-      "symbol": "\u222b",
+      "symbol": "∫",
       "description": "Quadrature methods for approximating definite integrals. Includes Newton-Cotes formulas and Gaussian quadrature.",
       "keywords": [
         "integration",
@@ -222,7 +227,7 @@
       "id": "differentiation",
       "title": "Differentiation",
       "path": "Differentiation",
-      "symbol": "\u2202",
+      "symbol": "∂",
       "description": "Numerical differentiation using finite difference methods. Forward, backward, and central difference approximations.",
       "keywords": [
         "differentiation",
@@ -252,7 +257,7 @@
       "id": "odes",
       "title": "Ordinary Differential Equations",
       "path": "ODEs",
-      "symbol": "y\u2032",
+      "symbol": "y′",
       "description": "Initial value problem solvers including Euler, Runge-Kutta, and adaptive methods. Boundary value problem solvers.",
       "keywords": [
         "ode",
@@ -267,7 +272,7 @@
       "id": "fourier-methods",
       "title": "Fourier Methods",
       "path": "Fourier-Methods",
-      "symbol": "F\u0302",
+      "symbol": "F̂",
       "description": "Discrete Fourier transform, Fast Fourier Transform, power spectral density, and signal analysis techniques.",
       "keywords": [
         "fourier",
@@ -283,7 +288,7 @@
       "id": "data-analysis",
       "title": "Data Analysis",
       "path": "Data-Analysis",
-      "symbol": "\u03c3",
+      "symbol": "σ",
       "description": "Statistical analysis, curve fitting, regression, error analysis, and data processing for experimental physics data.",
       "keywords": [
         "statistics",
@@ -298,7 +303,7 @@
       "id": "numerical-simulations",
       "title": "Numerical Simulations",
       "path": "Numerical-Simulations",
-      "symbol": "\u03a3",
+      "symbol": "Σ",
       "description": "Physics simulations including N-body dynamics, Monte Carlo methods, molecular dynamics, and stochastic processes.",
       "keywords": [
         "simulation",
