@@ -21,7 +21,7 @@
       "degree": "MSc Physics",
       "github": "sabhineet",
       "focus": "Data Analysis · Numerical Solutions · Differentiation · ODEs",
-      "bio": "MSc Physics student at UPES Dehradun, working across the full numerical spectrum — from differentiation and ODE solvers to data analysis and linear algebra. Writes clean, well-documented Python and is equally comfortable on Linux and Windows. Primary maintainer of the Root Finding and Linear Algebra modules.",
+      "bio": "MSc Physics student at UPES Dehradun, working across the full numerical spectrum — from differentiation and ODE solvers to data analysis and linear algebra. Writes clean, well-documented Python and is equally comfortable on Linux and Windows.",
       "tags": [
         "Python",
         "Linux",
@@ -38,7 +38,7 @@
       "degree": "MSc Physics",
       "github": "agniksr",
       "focus": "Numerical Methods · Simulations · Multi-language",
-      "bio": "MSc Physics student at SPPU Pune, covering the full range of numerical methods alongside physics simulations. Writes in Python, C++, and Fortran, and uses Mathematica for symbolic work. Primary maintainer of the Data Analysis and Numerical Simulations modules.",
+      "bio": "MSc Physics student at SPPU Pune, covering the full range of numerical methods alongside physics simulations. Writes in Python, C++, and Fortran, and uses Mathematica for symbolic work.",
       "tags": [
         "Python",
         "C++",
@@ -54,14 +54,14 @@
       "institution": "University of Sussex",
       "degree": "PhD Scholar",
       "github": "ruru-99",
-      "focus": "Numerical Methods · Simulations · Quantum Computing",
-      "bio": "PhD scholar at the University of Sussex working on numerical methods, numerical simulations, and quantum computing. Proficient in multiple programming languages and brings rigour from research-level computational physics. Primary contributor to the Numerical Simulations and Fourier Methods modules.",
+      "focus": "Numerical Methods · Simulations",
+      "bio": "PhD scholar at the University of Sussex working on numerical methods, numerical simulations, and quantum computing. Proficient in multiple programming languages and brings rigour from research-level computational physics.",
       "tags": [
         "Python",
         "C++",
-        "Quantum Computing",
         "Monte Carlo",
-        "Numerical Methods"
+        "Numerical Methods",
+        "Simulations"
       ]
     }
   ],
