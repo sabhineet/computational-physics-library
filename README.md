@@ -52,7 +52,7 @@ python Bisection_Method.py
 
 There's a companion website that lets you browse and read every file in the repository directly in the browser — with syntax highlighting, search, and navigation between methods.
 
-🔗 **[iter-ad-astra.github.io](https://sabhineet.github.io/computational-physics-library)** *(update with your actual URL)*
+🔗 **[iter-ad-astra.github.io](https://sabhineet.github.io/computational-physics-library/)** *(update with your actual URL)*
 
 ---
 
